@@ -8,6 +8,9 @@ using System.Drawing;
 using System.Drawing.Imaging;
 
 using System.IO;
+using Encoder = System.Drawing.Imaging.Encoder;
+
+
 
 namespace ImageTrimmingTool
 {
@@ -18,8 +21,9 @@ namespace ImageTrimmingTool
             try
             {
                 var files = args
-                    .Where(x => File.Exists(x))
-                    .Select(x => new FileInfo(x));
+                    .Where( x => File.Exists(x) )
+                    .Where( x => Path.GetExtension(x).ToLower().any(".jpg",".jpeg") )
+                    .Select( x => new FileInfo(x) );
 
                 Trimming(files);
 
@@ -38,36 +42,63 @@ namespace ImageTrimmingTool
 
         private static void Trimming(IEnumerable<FileInfo> files)
         {
+            // jpeg エンコーダの取得
+            var encoder = GetEncoder(ImageFormat.Jpeg);
+
+            // jpeg エンコードパラメータの設定
+            long quality = 90;
+            var parameters = new EncoderParameters(1);
+            parameters.Param[0] = new EncoderParameter(Encoder.Quality, quality);
+
+
+
+#warning いずれパラメータ化。
+            // 切り出し設定ベタ書き。
             int x = -18;
             int y = 0;
             int w = 960;
 
             foreach (var file in files)
             {
+                string origin = file.FullName;
+                string trimed = origin + ".trim";
+
+                // トリミング。
                 using (Bitmap src = new Bitmap(file.FullName))
                 {
                     int h = src.Height;
 
                     using (Bitmap dst = new Bitmap(w, h))
                     {
-                        // 座標を変えてイメージを描画＝トリミング
                         using (Graphics g = Graphics.FromImage(dst))
                         {
                             g.DrawImage(src, x, y);
                         }
 
-                        // トリムしたビットマップを保存。
-                        string save = file.FullName + ".trimed.png";
-                        dst.Save(save, ImageFormat.Png);
-
-                        Console.WriteLine("trimed: " + save);
+                        dst.Save(trimed, encoder, parameters);
+                        Console.WriteLine("trimed: " + trimed);
                     }
                 }
 
-                // 元のファイルを削除。
-                File.Delete(file.FullName);
+                // ファイルをスワップ。
+                File.Delete(origin);
+                File.Move(trimed, origin);
             }
 
+        }
+
+        /// <seealso cref="https://docs.microsoft.com/ja-jp/dotnet/framework/winforms/advanced/how-to-set-jpeg-compression-level"/>
+        private static ImageCodecInfo GetEncoder(ImageFormat format)
+        {
+            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
+            foreach (ImageCodecInfo codec in codecs)
+            {
+                if (codec.FormatID == format.Guid)
+                {
+                    return codec;
+                }
+            }
+            return null;
         }
     }
 }
