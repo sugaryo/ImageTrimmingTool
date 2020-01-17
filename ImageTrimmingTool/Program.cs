@@ -64,6 +64,7 @@ namespace ImageTrimmingTool
                 string trimed = origin + ".trim";
 
                 // トリミング。
+                #region トリミング処理
                 using (Bitmap src = new Bitmap(file.FullName))
                 {
                     int h = src.Height;
@@ -79,6 +80,8 @@ namespace ImageTrimmingTool
                         Console.WriteLine("trimed: " + trimed);
                     }
                 }
+                #endregion
+
 
                 // ファイルをスワップ。
                 File.Delete(origin);
