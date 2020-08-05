@@ -25,7 +25,29 @@ namespace ImageTrimmingTool
                     .Where( x => Path.GetExtension(x).ToLower().any(".jpg",".jpeg") )
                     .Select( x => new FileInfo(x) );
 
-                Trimming(files);
+                Console.WriteLine("input left margin of trim area.");
+                Console.Write("dx:");
+                int dx = Console.ReadLine().asInt();
+                if (dx <= 0)
+                {
+                    Console.WriteLine("exit by parameter[dx:{0}]", dx);
+                    Console.WriteLine("press any key to exit.");
+                    Console.ReadKey(true);
+                    return;
+                }
+
+                Console.WriteLine("input width of trim area.");
+                Console.Write("w:");
+                int w = Console.ReadLine().asInt();
+                if (w <= 0)
+                {
+                    Console.WriteLine("exit by parameter[w:{0}]", w);
+                    Console.WriteLine("press any key to exit.");
+                    Console.ReadKey(true);
+                    return;
+                }
+
+                Trimming(dx, w, files);
 
                 Console.WriteLine();
                 Console.WriteLine();
@@ -37,10 +59,12 @@ namespace ImageTrimmingTool
             {
                 Console.WriteLine(ex.Message);
                 Console.WriteLine(ex.StackTrace);
+                Console.WriteLine("press any key to exit.");
+                Console.ReadKey(true);
             }
         }
 
-        private static void Trimming(IEnumerable<FileInfo> files)
+        private static void Trimming(int dx, int w, IEnumerable<FileInfo> files)
         {
             // jpeg エンコーダの取得
             var encoder = GetEncoder(ImageFormat.Jpeg);
@@ -54,9 +78,6 @@ namespace ImageTrimmingTool
 
 #warning いずれパラメータ化。
             // 切り出し設定ベタ書き。
-            int x = -18;
-            int y = 0;
-            int w = 960;
 
             foreach (var file in files)
             {
@@ -73,7 +94,7 @@ namespace ImageTrimmingTool
                     {
                         using (Graphics g = Graphics.FromImage(dst))
                         {
-                            g.DrawImage(src, x, y);
+                            g.DrawImage(src, -dx, 0);
                         }
 
                         dst.Save(trimed, encoder, parameters);

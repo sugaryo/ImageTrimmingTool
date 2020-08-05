@@ -17,5 +17,9 @@ namespace ImageTrimmingTool
 
             return false;
         }
+
+        public static int asInt(this string str) {
+            return int.Parse(str);
+        }
     }
 }
