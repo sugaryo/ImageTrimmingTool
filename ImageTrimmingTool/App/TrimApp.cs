@@ -45,22 +45,69 @@ namespace ImageTrimmingTool.App
 
         protected override void Execute(Arguments arguments)
         {
-            var files = arguments.AsParameters()
+            var wizzard = new InputWizzard( new[] { "exit" } );
+
+
+            // ■入力ファイルリストを取得
+            List<FileInfo> files;
+
+            // まず普通に渡されたファイルパスをチェック。
+            files = arguments.AsParameters()
                 .Where( x => File.Exists( x ) )
                 .Where( x => Path.GetExtension( x ).ToLower().any( ".jpg", ".jpeg" ) )
                 .Select( x => new FileInfo( x ) )
                 .ToList();
 
-            if ( 0 == files.Count ) return;
+            // パラメータにファイルパスが無ければディレクトリパスをチェック。
+            if ( 0 == files.Count )
+            {
+                var dir = arguments.AsParameters()
+                    .Where( x => Directory.Exists( x ) )
+                    .Select( x => new DirectoryInfo( x ) )
+                    .FirstOrDefault();
+
+                if ( null != dir )
+                {
+                    Console.WriteLine( $"folder:{dir.FullName}" );
+                    files = dir.GetFiles()
+                        .AsEnumerable()
+                        .Where( x => Path.GetExtension( x.Name ).ToLower().any( ".jpg", ".jpeg" ) )
+                        .ToList();
+                }
+            }
+
+            // パラメータになかったらフォルダ入力。
+            if ( 0 == files.Count )
+            {
+                DirectoryInfo dir = null;
+                wizzard.TryInputOrPath( new[] {
+                        "ファイルが渡されなかったのでフォルダを指定スルノダ。",
+                        @"( input ""exit"" to exit )",
+                    }
+                    , (_) => {}
+                    , (_) => {}
+                    , (d) => { dir = d; }
+                );
+                if ( null == dir ) return;
+
+                Console.WriteLine( $"folder:{dir.FullName}" );
+                files = dir.GetFiles()
+                    .AsEnumerable()
+                    .Where( x => Path.GetExtension( x.Name ).ToLower().any( ".jpg", ".jpeg" ) )
+                    .ToList();
+
+                // それでも無ければもう終了。
+                if ( 0 == files.Count ) return;
+            }
 
 
-            var wizzard = new InputWizzard( new[] { "exit" } );
 
+            // ■トリミング条件入力
             string input;
 
             int dx;
             if ( wizzard.TryInput( new[] {
-                    "input LEFT-MARGIN of trim area.",
+                    "トリミングする領域の LEFT-MARGIN を入力。",
                     @"( input ""exit"" or value less than 0, to exit )",
                 }, out input ) )
             {
@@ -74,7 +121,7 @@ namespace ImageTrimmingTool.App
 
             int w;
             if ( wizzard.TryInput( new[] {
-                    "input WIDTH of trim area.",
+                    "トリミングする領域の WIDTH を入力。",
                     @"( input ""exit"" or value less than 0, to exit )",
                 }, out input ) )
             {
