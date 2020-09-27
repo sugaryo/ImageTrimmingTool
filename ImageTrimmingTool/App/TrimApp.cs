@@ -25,7 +25,21 @@ namespace ImageTrimmingTool.App
 
         protected override AppManual CreateAppManual()
         {
-            throw new NotImplementedException();
+            var manual = new AppManual()
+            {
+                Summary = new DescriptionInfo(
+                    null,
+                    @"画像をトリミングするツール" ),
+                MainParameter = new DescriptionInfo(
+                    null,
+                    @"トリミングしたい画像のパス（複数指定可）を渡します。" ),
+                Options = new List<DescriptionInfo>()
+                {
+                    //今の所特にオプション無いんだよね。
+                },
+            };
+
+            return manual;
         }
 
         protected override void Execute(Arguments arguments)
