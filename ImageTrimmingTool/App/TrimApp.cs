@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-
 using System.Drawing;
 using System.Drawing.Imaging;
 
@@ -15,6 +14,7 @@ using ArgsAnalyzer;
 using CliToolTemplate;
 using CliToolTemplate.Description;
 using CliToolTemplate.Utility;
+using Newtonsoft.Json;
 
 namespace ImageTrimmingTool.App
 {
@@ -84,8 +84,8 @@ namespace ImageTrimmingTool.App
                         "ファイルが渡されなかったのでフォルダを指定スルノダ。",
                         @"( input ""exit"" to exit )",
                     }
-                    , (_) => {}
-                    , (_) => {}
+                    , (_) => { }
+                    , (_) => { }
                     , (d) => { dir = d; }
                 );
                 if ( null == dir ) return;
@@ -105,14 +105,27 @@ namespace ImageTrimmingTool.App
             // ■トリミング条件入力
             string input;
 
+
             int dx;
             if ( wizzard.TryInput( new[] {
                     "トリミングする領域の LEFT-MARGIN を入力。",
+                    "若しくはトリミング領域を定義したJSONファイルパスを指定。",
                     @"( input ""exit"" or value less than 0, to exit )",
                 }, out input ) )
             {
-                dx = input.asInt();
-                if ( dx < 0 ) return;
+                // JSONファイル指定の場合
+                if ( File.Exists( input ) )
+                {
+                    string json = File.ReadAllText( input );
+                    Trimming( json, files );
+                    return;
+                }
+                // 数値入力
+                else
+                {
+                    dx = input.asInt();
+                    if ( dx < 0 ) return;
+                }
             }
             else
             {
@@ -122,11 +135,23 @@ namespace ImageTrimmingTool.App
             int w;
             if ( wizzard.TryInput( new[] {
                     "トリミングする領域の WIDTH を入力。",
+                    "若しくはトリミング領域を定義したJSONファイルパスを指定。",
                     @"( input ""exit"" or value less than 0, to exit )",
                 }, out input ) )
             {
-                w = input.asInt();
-                if ( w < 0 ) return;
+                // JSONファイル指定の場合
+                if ( File.Exists( input ) )
+                {
+                    string json = File.ReadAllText( input );
+                    Trimming( json, files );
+                    return;
+                }
+                // 数値入力
+                else
+                {
+                    w = input.asInt();
+                    if ( w < 0 ) return;
+                }
             }
             else
             {
@@ -137,6 +162,17 @@ namespace ImageTrimmingTool.App
             Trimming( dx, w, files );
         }
 
+        public class TrimmingArea
+        {
+            public int dx { get; set; }
+            public int w { get; set; }
+        }
+
+        private static void Trimming(string json, IEnumerable<FileInfo> files)
+        {
+            var area = JsonConvert.DeserializeObject<TrimmingArea>( json );
+            Trimming( area.dx, area.w, files );
+        }
 
         private static void Trimming(int dx, int w, IEnumerable<FileInfo> files)
         {
