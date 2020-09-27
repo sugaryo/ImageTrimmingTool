@@ -14,6 +14,7 @@ using Encoder = System.Drawing.Imaging.Encoder;
 using ArgsAnalyzer;
 using CliToolTemplate;
 using CliToolTemplate.Description;
+using CliToolTemplate.Utility;
 
 namespace ImageTrimmingTool.App
 {
@@ -47,25 +48,44 @@ namespace ImageTrimmingTool.App
             var files = arguments.AsParameters()
                 .Where( x => File.Exists( x ) )
                 .Where( x => Path.GetExtension( x ).ToLower().any( ".jpg", ".jpeg" ) )
-                .Select( x => new FileInfo( x ) );
+                .Select( x => new FileInfo( x ) )
+                .ToList();
 
-            Console.WriteLine( "input left margin of trim area." );
-            Console.Write( "dx:" );
-            int dx = Console.ReadLine().asInt();
-            if ( dx <= 0 )
+            if ( 0 == files.Count ) return;
+
+
+            var wizzard = new InputWizzard( new[] { "exit" } );
+
+            string input;
+
+            int dx;
+            if ( wizzard.TryInput( new[] {
+                    "input LEFT-MARGIN of trim area.",
+                    @"( input ""exit"" or value less than 0, to exit )",
+                }, out input ) )
             {
-                Console.WriteLine( "exit by parameter[dx:{0}]", dx );
+                dx = input.asInt();
+                if ( dx < 0 ) return;
+            }
+            else
+            {
                 return;
             }
 
-            Console.WriteLine( "input width of trim area." );
-            Console.Write( "w:" );
-            int w = Console.ReadLine().asInt();
-            if ( w <= 0 )
+            int w;
+            if ( wizzard.TryInput( new[] {
+                    "input WIDTH of trim area.",
+                    @"( input ""exit"" or value less than 0, to exit )",
+                }, out input ) )
             {
-                Console.WriteLine( "exit by parameter[w:{0}]", w );
+                w = input.asInt();
+                if ( w < 0 ) return;
+            }
+            else
+            {
                 return;
             }
+
 
             Trimming( dx, w, files );
         }
