@@ -53,7 +53,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App\Strategy\BaseTrimFileStrategy.cs" />
+    <Compile Include="App\Strategy\TrimSubDirectory.cs" />
+    <Compile Include="App\Strategy\TrimSwapFile.cs" />
     <Compile Include="App\TrimApp.cs" />
+    <Compile Include="App\TrimmingArea.cs" />
     <Compile Include="extensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

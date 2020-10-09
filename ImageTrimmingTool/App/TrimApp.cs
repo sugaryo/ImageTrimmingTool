@@ -11,16 +11,36 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using ImageTrimmingTool.App.Strategy;
 
 using Encoder = System.Drawing.Imaging.Encoder;
-
 
 namespace ImageTrimmingTool.App
 {
     public class TrimApp : ConsoleAppBase
     {
+        private readonly BaseTrimFileStrategy _strategy;
+
         public TrimApp(string[] args) : base( args )
         {
+            var mode = Trimming.Default.Mode;
+            switch ( mode )
+            {
+                case Trimming.TrimMode.SubDirectory:
+                    _strategy = new TrimSubDirectory();
+                    Console.WriteLine( "--------------------------------" );
+                    Console.WriteLine( "tool mode [SUB-DIRECTORY]" );
+                    Console.WriteLine( "--------------------------------" );
+                    break;
+                case Trimming.TrimMode.SwapFile:
+                    _strategy = new TrimSwapFile();
+                    Console.WriteLine( "--------------------------------" );
+                    Console.WriteLine( "tool mode [SWAP-FILE]" );
+                    Console.WriteLine( "--------------------------------" );
+                    break;
+                default:
+                    break;
+            }
         }
 
         protected override AppManual CreateAppManual()
@@ -45,7 +65,8 @@ namespace ImageTrimmingTool.App
         protected override void Execute(Arguments arguments)
         {
             var wizzard = new InputWizzard( new[] { "exit" } );
-
+            
+            
 
             // ■入力ファイルリストを取得
             List<FileInfo> files;
@@ -157,78 +178,24 @@ namespace ImageTrimmingTool.App
                 return;
             }
 
-
-            Trim( dx, w, files );
+            // json 設定パラメータを渡されず、キャンセルもされなかった場合。
+            // コンソール入力された値でトリミング。
+            TrimmingArea area = new TrimmingArea() { DX = dx, W = w };
+            Trim( area, files );
         }
 
-        public class TrimmingArea
-        {
-            public int dx { get; set; }
-            public int w { get; set; }
-        }
-
-        private static void Trim(string json, IEnumerable<FileInfo> files)
+        private void Trim(string json, IEnumerable<FileInfo> files)
         {
             var area = JsonConvert.DeserializeObject<TrimmingArea>( json );
-            Trim( area.dx, area.w, files );
+            this.Trim( area, files );
         }
 
-        private static void Trim(int dx, int w, IEnumerable<FileInfo> files)
+        private void Trim(TrimmingArea area, IEnumerable<FileInfo> files)
         {
-            // jpeg エンコーダの取得
-            var encoder = GetEncoder( ImageFormat.Jpeg );
-
-            // jpeg エンコードパラメータの設定
-            long quality = Trimming.Default.Quality;
-            var parameters = new EncoderParameters( 1 );
-            parameters.Param[0] = new EncoderParameter( Encoder.Quality, quality );
-
-
-#warning トリムファイルをスワップ式にするか /trim サブディレクトリ出力にするかオプション作るか。
             foreach ( var file in files )
             {
-                string origin = file.FullName;
-                string trimed = origin + ".trim";
-
-                // トリミング。
-                #region トリミング処理
-                using ( Bitmap src = new Bitmap( file.FullName ) )
-                {
-                    int h = src.Height;
-
-                    using ( Bitmap dst = new Bitmap( w, h ) )
-                    {
-                        using ( Graphics g = Graphics.FromImage( dst ) )
-                        {
-                            g.DrawImage( src, -dx, 0 );
-                        }
-
-                        dst.Save( trimed, encoder, parameters );
-                        Console.WriteLine( "trimed: " + trimed );
-                    }
-                }
-                #endregion
-
-
-                // ファイルをスワップ。
-                File.Delete( origin );
-                File.Move( trimed, origin );
+                _strategy.Trim( file, area );
             }
-
-        }
-
-        /// <seealso cref="https://docs.microsoft.com/ja-jp/dotnet/framework/winforms/advanced/how-to-set-jpeg-compression-level"/>
-        private static ImageCodecInfo GetEncoder(ImageFormat format)
-        {
-            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
-            foreach ( ImageCodecInfo codec in codecs )
-            {
-                if ( codec.FormatID == format.Guid )
-                {
-                    return codec;
-                }
-            }
-            return null;
         }
     }
 }
