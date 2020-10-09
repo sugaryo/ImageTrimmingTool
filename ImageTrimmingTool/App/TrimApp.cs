@@ -1,27 +1,46 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.Drawing;
-using System.Drawing.Imaging;
-
-using System.IO;
-using Encoder = System.Drawing.Imaging.Encoder;
-
-using ArgsAnalyzer;
+﻿using ArgsAnalyzer;
 using CliToolTemplate;
 using CliToolTemplate.Description;
 using CliToolTemplate.Utility;
+
 using Newtonsoft.Json;
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Linq;
+using ImageTrimmingTool.App.Strategy;
+
+using Encoder = System.Drawing.Imaging.Encoder;
 
 namespace ImageTrimmingTool.App
 {
     public class TrimApp : ConsoleAppBase
     {
+        private readonly BaseTrimFileStrategy _strategy;
+
         public TrimApp(string[] args) : base( args )
         {
+            var mode = Trimming.Default.Mode;
+            switch ( mode )
+            {
+                case Trimming.TrimMode.SubDirectory:
+                    _strategy = new TrimSubDirectory();
+                    Console.WriteLine( "--------------------------------" );
+                    Console.WriteLine( "tool mode [SUB-DIRECTORY]" );
+                    Console.WriteLine( "--------------------------------" );
+                    break;
+                case Trimming.TrimMode.SwapFile:
+                    _strategy = new TrimSwapFile();
+                    Console.WriteLine( "--------------------------------" );
+                    Console.WriteLine( "tool mode [SWAP-FILE]" );
+                    Console.WriteLine( "--------------------------------" );
+                    break;
+                default:
+                    break;
+            }
         }
 
         protected override AppManual CreateAppManual()
@@ -36,7 +55,13 @@ namespace ImageTrimmingTool.App
                     @"トリミングしたい画像のパス（複数指定可）を渡します。" ),
                 Options = new List<DescriptionInfo>()
                 {
-                    //今の所特にオプション無いんだよね。
+                    new DescriptionInfo("app.config.Mode", "SUB-DIRECTORY / SWAP-FILE"),
+                    new DescriptionInfo("  .Mode[SUB-DIRECTORY]", "サブディレクトリを作成し、そこにトリミングしたファイルを保存します。"),
+                    new DescriptionInfo("    - SUB-DIRECTORY alt mode", "D / Directory / SubDirectory"),
+                    new DescriptionInfo("    - SUB-DIRECTORY alt mode", "C / Copy "),
+                    new DescriptionInfo("  .Mode[SWAP-FILE]", "トリミングした一時ファイルを作成し、オリジナルと差し替えます。（疑似上書き）"),
+                    new DescriptionInfo("    - SWAP-FILE alt mode", "F / File / SwapFile"),
+                    new DescriptionInfo("    - SWAP-FILE alt mode", "O / OverWrite"),
                 },
             };
 
@@ -46,7 +71,8 @@ namespace ImageTrimmingTool.App
         protected override void Execute(Arguments arguments)
         {
             var wizzard = new InputWizzard( new[] { "exit" } );
-
+            
+            
 
             // ■入力ファイルリストを取得
             List<FileInfo> files;
@@ -117,7 +143,7 @@ namespace ImageTrimmingTool.App
                 if ( File.Exists( input ) )
                 {
                     string json = File.ReadAllText( input );
-                    Trimming( json, files );
+                    Trim( json, files );
                     return;
                 }
                 // 数値入力
@@ -143,7 +169,7 @@ namespace ImageTrimmingTool.App
                 if ( File.Exists( input ) )
                 {
                     string json = File.ReadAllText( input );
-                    Trimming( json, files );
+                    Trim( json, files );
                     return;
                 }
                 // 数値入力
@@ -158,78 +184,29 @@ namespace ImageTrimmingTool.App
                 return;
             }
 
-
-            Trimming( dx, w, files );
+            // json 設定パラメータを渡されず、キャンセルもされなかった場合。
+            // コンソール入力された値でトリミング。
+            TrimmingArea area = new TrimmingArea() { DX = dx, W = w };
+            Trim( area, files );
         }
 
-        public class TrimmingArea
-        {
-            public int dx { get; set; }
-            public int w { get; set; }
-        }
-
-        private static void Trimming(string json, IEnumerable<FileInfo> files)
+        private void Trim(string json, IEnumerable<FileInfo> files)
         {
             var area = JsonConvert.DeserializeObject<TrimmingArea>( json );
-            Trimming( area.dx, area.w, files );
+            this.Trim( area, files );
         }
 
-        private static void Trimming(int dx, int w, IEnumerable<FileInfo> files)
+        private void Trim(TrimmingArea area, IEnumerable<FileInfo> files)
         {
-            // jpeg エンコーダの取得
-            var encoder = GetEncoder( ImageFormat.Jpeg );
-
-            // jpeg エンコードパラメータの設定
-            long quality = 90;
-            var parameters = new EncoderParameters( 1 );
-            parameters.Param[0] = new EncoderParameter( Encoder.Quality, quality );
-
-
-#warning トリムファイルをスワップ式にするか /trim サブディレクトリ出力にするかオプション作るか。
             foreach ( var file in files )
             {
-                string origin = file.FullName;
-                string trimed = origin + ".trim";
-
-                // トリミング。
-                #region トリミング処理
-                using ( Bitmap src = new Bitmap( file.FullName ) )
-                {
-                    int h = src.Height;
-
-                    using ( Bitmap dst = new Bitmap( w, h ) )
-                    {
-                        using ( Graphics g = Graphics.FromImage( dst ) )
-                        {
-                            g.DrawImage( src, -dx, 0 );
-                        }
-
-                        dst.Save( trimed, encoder, parameters );
-                        Console.WriteLine( "trimed: " + trimed );
-                    }
-                }
-                #endregion
+                var trimed = _strategy.Trim( file, area );
 
 
-                // ファイルをスワップ。
-                File.Delete( origin );
-                File.Move( trimed, origin );
+                Console.WriteLine( "trim." );
+                Console.WriteLine( $"  - [origin] {file.FullName}" );
+                Console.WriteLine( $"  - [trimed] {trimed.FullName}" );
             }
-
-        }
-
-        /// <seealso cref="https://docs.microsoft.com/ja-jp/dotnet/framework/winforms/advanced/how-to-set-jpeg-compression-level"/>
-        private static ImageCodecInfo GetEncoder(ImageFormat format)
-        {
-            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
-            foreach ( ImageCodecInfo codec in codecs )
-            {
-                if ( codec.FormatID == format.Guid )
-                {
-                    return codec;
-                }
-            }
-            return null;
         }
     }
 }

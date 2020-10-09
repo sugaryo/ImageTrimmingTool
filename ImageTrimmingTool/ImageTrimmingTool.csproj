@@ -53,13 +53,29 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App\Strategy\BaseTrimFileStrategy.cs" />
+    <Compile Include="App\Strategy\TrimSubDirectory.cs" />
+    <Compile Include="App\Strategy\TrimSwapFile.cs" />
     <Compile Include="App\TrimApp.cs" />
+    <Compile Include="App\TrimmingArea.cs" />
     <Compile Include="extensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Trimming.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Trimming.settings</DependentUpon>
+    </Compile>
+    <Compile Include="Trimming.partial.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Trimming.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Trimming.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
