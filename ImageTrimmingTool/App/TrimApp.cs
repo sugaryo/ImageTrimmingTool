@@ -185,6 +185,7 @@ namespace ImageTrimmingTool.App
             parameters.Param[0] = new EncoderParameter( Encoder.Quality, quality );
 
 
+#warning トリムファイルをスワップ式にするか /trim サブディレクトリ出力にするかオプション作るか。
             foreach ( var file in files )
             {
                 string origin = file.FullName;
