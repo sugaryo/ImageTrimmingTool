@@ -1,20 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.Drawing;
-using System.Drawing.Imaging;
-
-using System.IO;
-using Encoder = System.Drawing.Imaging.Encoder;
-
-using ArgsAnalyzer;
+﻿using ArgsAnalyzer;
 using CliToolTemplate;
 using CliToolTemplate.Description;
 using CliToolTemplate.Utility;
+
 using Newtonsoft.Json;
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Linq;
+
+using Encoder = System.Drawing.Imaging.Encoder;
+
 
 namespace ImageTrimmingTool.App
 {
@@ -117,7 +116,7 @@ namespace ImageTrimmingTool.App
                 if ( File.Exists( input ) )
                 {
                     string json = File.ReadAllText( input );
-                    Trimming( json, files );
+                    Trim( json, files );
                     return;
                 }
                 // 数値入力
@@ -143,7 +142,7 @@ namespace ImageTrimmingTool.App
                 if ( File.Exists( input ) )
                 {
                     string json = File.ReadAllText( input );
-                    Trimming( json, files );
+                    Trim( json, files );
                     return;
                 }
                 // 数値入力
@@ -159,7 +158,7 @@ namespace ImageTrimmingTool.App
             }
 
 
-            Trimming( dx, w, files );
+            Trim( dx, w, files );
         }
 
         public class TrimmingArea
@@ -168,19 +167,19 @@ namespace ImageTrimmingTool.App
             public int w { get; set; }
         }
 
-        private static void Trimming(string json, IEnumerable<FileInfo> files)
+        private static void Trim(string json, IEnumerable<FileInfo> files)
         {
             var area = JsonConvert.DeserializeObject<TrimmingArea>( json );
-            Trimming( area.dx, area.w, files );
+            Trim( area.dx, area.w, files );
         }
 
-        private static void Trimming(int dx, int w, IEnumerable<FileInfo> files)
+        private static void Trim(int dx, int w, IEnumerable<FileInfo> files)
         {
             // jpeg エンコーダの取得
             var encoder = GetEncoder( ImageFormat.Jpeg );
 
             // jpeg エンコードパラメータの設定
-            long quality = 90;
+            long quality = Trimming.Default.Quality;
             var parameters = new EncoderParameters( 1 );
             parameters.Param[0] = new EncoderParameter( Encoder.Quality, quality );
 
