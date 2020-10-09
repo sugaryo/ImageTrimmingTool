@@ -34,7 +34,7 @@ namespace ImageTrimmingTool {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("F")]
+        [global::System.Configuration.DefaultSettingValueAttribute("D")]
         public string ModeValue {
             get {
                 return ((string)(this["ModeValue"]));

@@ -6,7 +6,7 @@
       <Value Profile="(Default)">90</Value>
     </Setting>
     <Setting Name="ModeValue" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">F</Value>
+      <Value Profile="(Default)">D</Value>
     </Setting>
   </Settings>
 </SettingsFile>
