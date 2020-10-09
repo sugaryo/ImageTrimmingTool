@@ -31,5 +31,14 @@ namespace ImageTrimmingTool {
                 return ((int)(this["Quality"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("F")]
+        public string ModeValue {
+            get {
+                return ((string)(this["ModeValue"]));
+            }
+        }
     }
 }

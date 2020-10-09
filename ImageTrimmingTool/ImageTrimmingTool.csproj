@@ -62,9 +62,12 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Trimming.settings</DependentUpon>
     </Compile>
+    <Compile Include="Trimming.partial.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Trimming.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Trimming.Designer.cs</LastGenOutput>
