@@ -55,7 +55,13 @@ namespace ImageTrimmingTool.App
                     @"トリミングしたい画像のパス（複数指定可）を渡します。" ),
                 Options = new List<DescriptionInfo>()
                 {
-                    //今の所特にオプション無いんだよね。
+                    new DescriptionInfo("app.config.Mode", "SUB-DIRECTORY / SWAP-FILE"),
+                    new DescriptionInfo("  .Mode[SUB-DIRECTORY]", "サブディレクトリを作成し、そこにトリミングしたファイルを保存します。"),
+                    new DescriptionInfo("    - SUB-DIRECTORY alt mode", "D / Directory / SubDirectory"),
+                    new DescriptionInfo("    - SUB-DIRECTORY alt mode", "C / Copy "),
+                    new DescriptionInfo("  .Mode[SWAP-FILE]", "トリミングした一時ファイルを作成し、オリジナルと差し替えます。（疑似上書き）"),
+                    new DescriptionInfo("    - SWAP-FILE alt mode", "F / File / SwapFile"),
+                    new DescriptionInfo("    - SWAP-FILE alt mode", "O / OverWrite"),
                 },
             };
 

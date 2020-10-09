@@ -21,6 +21,7 @@ namespace ImageTrimmingTool {
 
                 switch ( mode.ToLower() )
                 {
+                    case "sub-directory":
                     case "d":
                     case "directory":
                     case "subdirectory":
@@ -29,6 +30,7 @@ namespace ImageTrimmingTool {
                     case "copy":
                         return TrimMode.SubDirectory;
 
+                    case "swap-file":
                     case "f":
                     case "file":
                     case "swapfile":
