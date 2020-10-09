@@ -200,7 +200,12 @@ namespace ImageTrimmingTool.App
         {
             foreach ( var file in files )
             {
-                _strategy.Trim( file, area );
+                var trimed = _strategy.Trim( file, area );
+
+
+                Console.WriteLine( "trim." );
+                Console.WriteLine( $"  - [origin] {file.FullName}" );
+                Console.WriteLine( $"  - [trimed] {trimed.FullName}" );
             }
         }
     }
