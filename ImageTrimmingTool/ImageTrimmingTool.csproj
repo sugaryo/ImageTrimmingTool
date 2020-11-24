@@ -57,7 +57,7 @@
     <Compile Include="App\Strategy\TrimSubDirectory.cs" />
     <Compile Include="App\Strategy\TrimSwapFile.cs" />
     <Compile Include="App\TrimApp.cs" />
-    <Compile Include="App\TrimmingArea.cs" />
+    <Compile Include="App\TrimmingSetting.cs" />
     <Compile Include="extensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -77,5 +77,6 @@
       <LastGenOutput>Trimming.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

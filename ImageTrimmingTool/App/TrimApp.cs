@@ -99,73 +99,29 @@ namespace ImageTrimmingTool.App
             }
 
 
-
-
-
-            // ■トリミング条件入力
-            string input;
-
-
-            int dx;
-            if ( _wizzard.TryInput( new[] {
-                    "トリミングする領域の LEFT-MARGIN を入力。",
-                    "若しくはトリミング領域を定義したJSONファイルパスを指定。",
-                    @"( input ""exit"" or value less than 0, to exit )",
-                }, out input ) )
+            // ■トリミング領域入力
+            // ※ コンソールからの自由入力は一旦機能削除。
+            TrimmingSetting area = null;
+            if (  _wizzard.TryInputOrPath( new[] { 
+                        "トリミング領域を定義したJSONファイルパスを指定してください。",
+                        "若しくはJSON文字列をそのまま入力",
+                        @"( input ""exit"" to exit )" 
+                    },
+                    ( input ) =>
+                    {
+                        System.Diagnostics.Debug.WriteLine( $"[debug] JSON入力 : {input}" );
+                        area = TrimmingSetting.Parse( input );
+                    },
+                    ( path ) =>
+                    {
+                        System.Diagnostics.Debug.WriteLine( $"[debug] パス入力 : {path}" );
+                        string json = File.ReadAllText( path );
+                        area = TrimmingSetting.Parse( json );
+                    } 
+                    ) )
             {
-                // JSONファイル指定の場合
-                if ( File.Exists( input ) )
-                {
-                    string json = File.ReadAllText( input );
-                    this.Trim( TrimmingArea.Parse( json ), files );
-                    return;
-                }
-                // 数値入力
-                else
-                {
-                    dx = input.asInt();
-                    if ( dx < 0 ) return;
-                }
+                this.Trim( area, files );
             }
-            else
-            {
-                return;
-            }
-
-            int w;
-            if ( _wizzard.TryInput( new[] {
-                    "トリミングする領域の WIDTH を入力。",
-                    "若しくはトリミング領域を定義したJSONファイルパスを指定。",
-                    @"( input ""exit"" or value less than 0, to exit )",
-                }, out input ) )
-            {
-                // JSONファイル指定の場合
-                if ( File.Exists( input ) )
-                {
-                    string json = File.ReadAllText( input );
-                    this.Trim( TrimmingArea.Parse( json ), files );
-                    return;
-                }
-                // 数値入力
-                else
-                {
-                    w = input.asInt();
-                    if ( w < 0 ) return;
-                }
-            }
-            else
-            {
-                return;
-            }
-
-
-
-
-#warning トリミングの領域指定方法を拡充したい。
-            // json 設定パラメータを渡されず、キャンセルもされなかった場合。
-            // コンソール入力された値でトリミング。
-            TrimmingArea area = new TrimmingArea() { DX = dx, W = w };
-            this.Trim( area, files );
         }
         #endregion
 
@@ -229,10 +185,7 @@ namespace ImageTrimmingTool.App
             return new List<FileInfo>();
         }
 
-
-#warning 実際のトリミング処理、メインロジックを改良したい。
-
-        private void Trim(TrimmingArea area, IEnumerable<FileInfo> files)
+        private void Trim(TrimmingSetting area, IEnumerable<FileInfo> files)
         {
             foreach ( var file in files )
             {

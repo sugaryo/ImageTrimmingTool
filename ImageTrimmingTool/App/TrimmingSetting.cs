@@ -1,0 +1,123 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using Newtonsoft.Json;
+
+namespace ImageTrimmingTool.App
+{
+    public class TrimmingSetting
+    {
+        public struct DrawSetting
+        {
+            public Size size;
+            public int x;
+            public int y;
+            public int w;
+            public int h;
+        }
+
+        public int? Width { get; set; }
+        public int? Height { get; set; }
+
+        public int? Left { get; set; }
+        public int? Right { get; set; }
+        public int? Top { get; set; }
+        public int? Bottom { get; set; }
+
+        public string Padding { get; set; }
+
+        [JsonProperty( PropertyName = "padding-top" )]
+        public int? PaddingTop { get; set; }
+        [JsonProperty( PropertyName = "padding-right" )]
+        public int? PaddingRight { get; set; }
+        [JsonProperty( PropertyName = "padding-bottom" )]
+        public int? PaddingBottom { get; set; }
+        [JsonProperty( PropertyName = "padding-left" )]
+        public int? PaddingLeft { get; set; }
+
+
+
+        public DrawSetting Compile( Size origin )
+        {
+            DrawSetting draw = new DrawSetting();
+            
+            // { top, right, bottom, left } を取得。
+            // 優先順位：無印.xxx > padding-xxx > padding[]
+            int[] padding = this.CompilePadding();
+            int top    = this.Top    ?? this.PaddingTop    ?? padding[0];
+            int right  = this.Right  ?? this.PaddingRight  ?? padding[1];
+            int bottom = this.Bottom ?? this.PaddingBottom ?? padding[2];
+            int left   = this.Left   ?? this.PaddingLeft   ?? padding[3];
+
+            draw.x = left;
+            draw.y = top;
+            draw.w = origin.Width - ( right + left );
+            draw.h = origin.Height - ( top + bottom );
+
+            // WidthHeight が指定されていない場合は自動計算。
+            int width  = this.Width  ?? draw.w;
+            int height = this.Height ?? draw.h;
+
+            draw.size = new Size( width, height );
+
+            return draw;
+        }
+
+        private int[] CompilePadding()
+        {
+            string padding = this.Padding ?? "0 0 0 0";
+
+            var token = padding
+                    .Split( new[] { ' ' } )
+                    .AsEnumerable()
+                    .Select( x => int.Parse( x ) )
+                    .ToList();
+
+
+            switch ( token.Count )
+            {
+                case 1:
+                    return new int[] { token[0], token[0], token[0], token[0] };
+                case 2:
+                    return new int[] { token[0], token[1], token[0], token[1] };
+                case 3:
+                    return new int[] { token[0], token[1], token[2], token[1] }; // ここちょっと自信ない。
+                case 4:
+                    return token.ToArray();
+                default:
+                    return token.Take( 4 ).ToArray();
+            }
+        }
+        
+
+
+        public static TrimmingSetting Parse(string json)
+        {
+            Console.WriteLine( json );
+            var obj = JsonConvert.DeserializeObject<TrimmingSetting>( json );
+
+            System.Diagnostics.Debug.WriteLine( "[debug] size" );
+            System.Diagnostics.Debug.WriteLine( $"  - Width   : {obj.Width}" );
+            System.Diagnostics.Debug.WriteLine( $"  - Height  : {obj.Height}" );
+
+            System.Diagnostics.Debug.WriteLine( "[debug] trim" );
+            System.Diagnostics.Debug.WriteLine( $"  - left    : {obj.Left}" );
+            System.Diagnostics.Debug.WriteLine( $"  - right   : {obj.Right}" );
+            System.Diagnostics.Debug.WriteLine( $"  - top     : {obj.Top}" );
+            System.Diagnostics.Debug.WriteLine( $"  - bottom  : {obj.Bottom}" );
+
+            System.Diagnostics.Debug.WriteLine( "[debug] padding" );
+            System.Diagnostics.Debug.WriteLine( $"  - p       : {obj.Padding}" );
+            System.Diagnostics.Debug.WriteLine( $"  - p.top   : {obj.PaddingTop}" );
+            System.Diagnostics.Debug.WriteLine( $"  - p.right : {obj.PaddingRight}" );
+            System.Diagnostics.Debug.WriteLine( $"  - p.bottom: {obj.PaddingBottom}" );
+            System.Diagnostics.Debug.WriteLine( $"  - p.left  : {obj.PaddingLeft}" );
+            return obj;
+        }
+
+    }
+}
