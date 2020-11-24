@@ -148,7 +148,7 @@ namespace ImageTrimmingTool.App
                 if ( File.Exists( input ) )
                 {
                     string json = File.ReadAllText( input );
-                    this.Trim( json, files );
+                    this.Trim( TrimmingArea.Parse( json ), files );
                     return;
                 }
                 // 数値入力
@@ -174,7 +174,7 @@ namespace ImageTrimmingTool.App
                 if ( File.Exists( input ) )
                 {
                     string json = File.ReadAllText( input );
-                    this.Trim( json, files );
+                    this.Trim( TrimmingArea.Parse( json ), files );
                     return;
                 }
                 // 数値入力
@@ -202,11 +202,6 @@ namespace ImageTrimmingTool.App
 
 
 #warning 実際のトリミング処理、メインロジックを改良したい。
-        private void Trim(string json, IEnumerable<FileInfo> files)
-        {
-            var area = JsonConvert.DeserializeObject<TrimmingArea>( json );
-            this.Trim( area, files );
-        }
 
         private void Trim(TrimmingArea area, IEnumerable<FileInfo> files)
         {
