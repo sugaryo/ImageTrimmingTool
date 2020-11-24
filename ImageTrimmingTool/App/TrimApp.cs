@@ -83,58 +83,22 @@ namespace ImageTrimmingTool.App
         #region ConsoleAppBase::Execute 実装（メインロジック）
         protected override void Execute(Arguments arguments)
         {
-
             // ■入力ファイルリストを取得
-            List<FileInfo> files;
-
-            // まず普通に渡されたファイルパスをチェック。
-            files = arguments.AsParameters()
-                .Where( x => File.Exists( x ) )
-                .Where( x => Path.GetExtension( x ).ToLower().any( ".jpg", ".jpeg" ) )
-                .Select( x => new FileInfo( x ) )
-                .ToList();
-
-            // パラメータにファイルパスが無ければディレクトリパスをチェック。
+            List<FileInfo> files = this.AnalizeInputFiles( arguments );
             if ( 0 == files.Count )
             {
-                var dir = arguments.AsParameters()
-                    .Where( x => Directory.Exists( x ) )
-                    .Select( x => new DirectoryInfo( x ) )
-                    .FirstOrDefault();
-
-                if ( null != dir )
-                {
-                    Console.WriteLine( $"folder:{dir.FullName}" );
-                    files = dir.GetFiles()
-                        .AsEnumerable()
-                        .Where( x => Path.GetExtension( x.Name ).ToLower().any( ".jpg", ".jpeg" ) )
-                        .ToList();
-                }
+                Console.WriteLine();
+                Console.WriteLine( "【！】処理中断：入力ファイルなし【！】" );
+                Console.WriteLine();
+                Console.WriteLine( "特にやることも無いのでヘルプを表示します。" );
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine();
+                base.ShowHelp();
+                return;
             }
 
-            // パラメータになかったらフォルダ入力。
-            if ( 0 == files.Count )
-            {
-                DirectoryInfo dir = null;
-                _wizzard.TryInputOrPath( new[] {
-                        "ファイルが渡されなかったのでフォルダを指定スルノダ。",
-                        @"( input ""exit"" to exit )",
-                    }
-                    , (_) => { }
-                    , (_) => { }
-                    , (d) => { dir = d; }
-                );
-                if ( null == dir ) return;
 
-                Console.WriteLine( $"folder:{dir.FullName}" );
-                files = dir.GetFiles()
-                    .AsEnumerable()
-                    .Where( x => Path.GetExtension( x.Name ).ToLower().any( ".jpg", ".jpeg" ) )
-                    .ToList();
-
-                // それでも無ければもう終了。
-                if ( 0 == files.Count ) return;
-            }
 
 
 
@@ -204,6 +168,66 @@ namespace ImageTrimmingTool.App
             this.Trim( area, files );
         }
         #endregion
+
+        private List<FileInfo> AnalizeInputFiles(Arguments arguments)
+        {
+            List<FileInfo> files;
+
+
+            // ■まず普通に渡された args から JPEGファイルパス をチェック。
+            files = arguments.AsParameters()
+                .Where( x => File.Exists( x ) )
+                .Where( x => Path.GetExtension( x ).ToLower().any( ".jpg", ".jpeg" ) )
+                .Select( x => new FileInfo( x ) )
+                .ToList();
+            if ( 0 < files.Count ) return files;
+
+
+            // ■JPEGファイルが渡されてなかったら、次点で ディレクトリパス をチェック。（複数ある場合はFirstを優先して採用）
+            { 
+                var dir = arguments.AsParameters()
+                    .Where( x => Directory.Exists( x ) )
+                    .Select( x => new DirectoryInfo( x ) )
+                    .FirstOrDefault();
+                if ( null != dir )
+                {
+                    files = dir.GetFiles()
+                        .AsEnumerable()
+                        .Where( x => Path.GetExtension( x.Name ).ToLower().any( ".jpg", ".jpeg" ) )
+                        .ToList();
+                    if ( 0 < files.Count ) return files;
+                }
+            }
+
+
+#warning このパターンいるかな？？？
+
+            // ■パラメータで入力ファイルが渡されなかった場合、ウィザードでフォルダ指定する。
+            if ( _wizzard.TryInputOrPath( 
+                    new[] {
+                            "ファイルが渡されなかったのでフォルダを指定スルノダ。",
+                            @"( input ""exit"" to exit )",
+                    },
+                    (_) => { }, // action.path     (nop)
+                    (_) => { }, // action.FileInfo (nop)
+                                // action.DirectoryInfo
+                    ( folder ) =>
+                    {
+                        // ウィザードでフォルダが指定された場合、JPEGファイルのリストを取得。
+                        files = folder.GetFiles()
+                            .AsEnumerable()
+                            .Where( x => Path.GetExtension( x.Name ).ToLower().any( ".jpg", ".jpeg" ) )
+                            .ToList();
+                    } ) )
+            {
+                if ( 0 < files.Count ) return files;
+            }
+
+
+            // ■いずれの方法でも入力ファイルが特定されなかったら空のリストを返す（処理終了）
+            System.Diagnostics.Debug.WriteLine( "入力ファイルなし。" );
+            return new List<FileInfo>();
+        }
 
 
 #warning 実際のトリミング処理、メインロジックを改良したい。
