@@ -29,22 +29,27 @@ namespace ImageTrimmingTool.App.Strategy
             #endregion
         }
 
-        public FileInfo Trim(FileInfo origin, TrimmingArea area)
+        public FileInfo Trim(FileInfo origin, TrimmingSetting setting)
         {
             FileInfo trimed = this.Before( origin );
 
 
-#warning ここの処理を更に拡張できるようにAlgorithmストラテジで置き換えたい。
             #region イメージのトリミング処理 { origin -> trimed }
             using ( Bitmap src = new Bitmap( origin.FullName ) )
             {
-                int h = src.Height;
+                TrimmingSetting.DrawSetting draw = setting.Compile( src.Size );
 
-                using ( Bitmap dst = new Bitmap( area.Width.Value, h ) )
+
+                using ( Bitmap dst = new Bitmap( draw.size.Width, draw.size.Height ) )
                 {
                     using ( Graphics g = Graphics.FromImage( dst ) )
                     {
-                        g.DrawImage( src, -area.Left.Value, 0 );
+                        g.DrawImage( src
+                            , 0
+                            , 0
+                            , new Rectangle( draw.x, draw.y, draw.w, draw.h ) 
+                            , GraphicsUnit.Pixel
+                        );
                     }
 
                     dst.Save( trimed.FullName, _encoder, _parameters );
@@ -55,6 +60,10 @@ namespace ImageTrimmingTool.App.Strategy
 
             return this.After( origin, trimed );
         }
+
+
+
+
 
         /// <summary>
         /// 前処理：トリミング処理の出力ファイルを用意する前処理を実装する。
