@@ -34,6 +34,7 @@ namespace ImageTrimmingTool.App.Strategy
             FileInfo trimed = this.Before( origin );
 
 
+#warning ここの処理を更に拡張できるようにAlgorithmストラテジで置き換えたい。
             #region イメージのトリミング処理 { origin -> trimed }
             using ( Bitmap src = new Bitmap( origin.FullName ) )
             {
@@ -55,8 +56,19 @@ namespace ImageTrimmingTool.App.Strategy
             return this.After( origin, trimed );
         }
 
+        /// <summary>
+        /// 前処理：トリミング処理の出力ファイルを用意する前処理を実装する。
+        /// </summary>
+        /// <param name="origin">入力ファイル</param>
+        /// <returns>出力ファイル</returns>
         protected abstract FileInfo Before(FileInfo origin);
         
+        /// <summary>
+        /// 後処理：入力ファイル及び出力ファイルを用いて必要な後処理を実装する。
+        /// </summary>
+        /// <param name="origin">入力ファイル</param>
+        /// <param name="trimed">出力ファイル</param>
+        /// <returns>最終的な出力ファイル</returns>
         protected abstract FileInfo After(FileInfo origin, FileInfo trimed);
 
 

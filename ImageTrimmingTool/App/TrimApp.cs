@@ -21,6 +21,7 @@ namespace ImageTrimmingTool.App
     {
         private readonly BaseTrimFileStrategy _strategy;
 
+        #region ctor
         public TrimApp(string[] args) : base( args )
         {
             var mode = Trimming.Default.Mode;
@@ -42,7 +43,9 @@ namespace ImageTrimmingTool.App
                     break;
             }
         }
+        #endregion
 
+        #region ConsoleAppBase::CreateAppMabual 実装
         protected override AppManual CreateAppManual()
         {
             var manual = new AppManual()
@@ -67,7 +70,9 @@ namespace ImageTrimmingTool.App
 
             return manual;
         }
-
+        #endregion
+        
+        #region ConsoleAppBase::Execute 実装（メインロジック）
         protected override void Execute(Arguments arguments)
         {
             var wizzard = new InputWizzard( new[] { "exit" } );
@@ -143,7 +148,7 @@ namespace ImageTrimmingTool.App
                 if ( File.Exists( input ) )
                 {
                     string json = File.ReadAllText( input );
-                    Trim( json, files );
+                    this.Trim( json, files );
                     return;
                 }
                 // 数値入力
@@ -169,7 +174,7 @@ namespace ImageTrimmingTool.App
                 if ( File.Exists( input ) )
                 {
                     string json = File.ReadAllText( input );
-                    Trim( json, files );
+                    this.Trim( json, files );
                     return;
                 }
                 // 数値入力
@@ -184,12 +189,19 @@ namespace ImageTrimmingTool.App
                 return;
             }
 
+
+
+
+#warning トリミングの領域指定方法を拡充したい。
             // json 設定パラメータを渡されず、キャンセルもされなかった場合。
             // コンソール入力された値でトリミング。
             TrimmingArea area = new TrimmingArea() { DX = dx, W = w };
-            Trim( area, files );
+            this.Trim( area, files );
         }
+        #endregion
 
+
+#warning 実際のトリミング処理、メインロジックを改良したい。
         private void Trim(string json, IEnumerable<FileInfo> files)
         {
             var area = JsonConvert.DeserializeObject<TrimmingArea>( json );
@@ -208,5 +220,6 @@ namespace ImageTrimmingTool.App
                 Console.WriteLine( $"  - [trimed] {trimed.FullName}" );
             }
         }
+
     }
 }
