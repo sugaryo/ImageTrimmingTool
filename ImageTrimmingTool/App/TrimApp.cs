@@ -19,13 +19,21 @@ namespace ImageTrimmingTool.App
 {
     public class TrimApp : ConsoleAppBase
     {
+        private readonly InputWizzard _wizzard;
+
         private readonly BaseTrimFileStrategy _strategy;
+
+        private Trimming.TrimMode Mode
+        {
+            get { return Trimming.Default.Mode; }
+        }
 
         #region ctor
         public TrimApp(string[] args) : base( args )
         {
-            var mode = Trimming.Default.Mode;
-            switch ( mode )
+            this._wizzard = new InputWizzard( new[] { "exit" } );
+
+            switch ( this.Mode )
             {
                 case Trimming.TrimMode.SubDirectory:
                     _strategy = new TrimSubDirectory();
@@ -75,9 +83,6 @@ namespace ImageTrimmingTool.App
         #region ConsoleAppBase::Execute 実装（メインロジック）
         protected override void Execute(Arguments arguments)
         {
-            var wizzard = new InputWizzard( new[] { "exit" } );
-            
-            
 
             // ■入力ファイルリストを取得
             List<FileInfo> files;
@@ -111,7 +116,7 @@ namespace ImageTrimmingTool.App
             if ( 0 == files.Count )
             {
                 DirectoryInfo dir = null;
-                wizzard.TryInputOrPath( new[] {
+                _wizzard.TryInputOrPath( new[] {
                         "ファイルが渡されなかったのでフォルダを指定スルノダ。",
                         @"( input ""exit"" to exit )",
                     }
@@ -138,7 +143,7 @@ namespace ImageTrimmingTool.App
 
 
             int dx;
-            if ( wizzard.TryInput( new[] {
+            if ( _wizzard.TryInput( new[] {
                     "トリミングする領域の LEFT-MARGIN を入力。",
                     "若しくはトリミング領域を定義したJSONファイルパスを指定。",
                     @"( input ""exit"" or value less than 0, to exit )",
@@ -164,7 +169,7 @@ namespace ImageTrimmingTool.App
             }
 
             int w;
-            if ( wizzard.TryInput( new[] {
+            if ( _wizzard.TryInput( new[] {
                     "トリミングする領域の WIDTH を入力。",
                     "若しくはトリミング領域を定義したJSONファイルパスを指定。",
                     @"( input ""exit"" or value less than 0, to exit )",
