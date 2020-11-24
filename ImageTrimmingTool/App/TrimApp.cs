@@ -100,7 +100,7 @@ namespace ImageTrimmingTool.App
 
 
 
-
+#warning コンソール入力は一旦無しにした方が良いかも。
 
             // ■トリミング条件入力
             string input;

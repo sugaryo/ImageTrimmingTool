@@ -40,11 +40,11 @@ namespace ImageTrimmingTool.App.Strategy
             {
                 int h = src.Height;
 
-                using ( Bitmap dst = new Bitmap( area.W, h ) )
+                using ( Bitmap dst = new Bitmap( area.Width.Value, h ) )
                 {
                     using ( Graphics g = Graphics.FromImage( dst ) )
                     {
-                        g.DrawImage( src, -area.DX, 0 );
+                        g.DrawImage( src, -area.Left.Value, 0 );
                     }
 
                     dst.Save( trimed.FullName, _encoder, _parameters );
