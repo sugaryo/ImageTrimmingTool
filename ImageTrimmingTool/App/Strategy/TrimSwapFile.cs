@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace ImageTrimmingTool.App.Strategy
 {
+    [Obsolete("PNG化した事で色々と事情が変わったのでSWAPモード自体を廃止した。", true)]
     public class TrimSwapFile : BaseTrimFileStrategy
     {
         protected override FileInfo Before(FileInfo origin)

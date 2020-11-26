@@ -23,33 +23,14 @@ namespace ImageTrimmingTool.App
 
         private readonly BaseTrimFileStrategy _strategy;
 
-        private Trimming.TrimMode Mode
-        {
-            get { return Trimming.Default.Mode; }
-        }
 
         #region ctor
         public TrimApp(string[] args) : base( args )
         {
             this._wizzard = new InputWizzard( new[] { "exit" } );
 
-            switch ( this.Mode )
-            {
-                case Trimming.TrimMode.SubDirectory:
-                    _strategy = new TrimSubDirectory();
-                    Console.WriteLine( "--------------------------------" );
-                    Console.WriteLine( "tool mode [SUB-DIRECTORY]" );
-                    Console.WriteLine( "--------------------------------" );
-                    break;
-                case Trimming.TrimMode.SwapFile:
-                    _strategy = new TrimSwapFile();
-                    Console.WriteLine( "--------------------------------" );
-                    Console.WriteLine( "tool mode [SWAP-FILE]" );
-                    Console.WriteLine( "--------------------------------" );
-                    break;
-                default:
-                    break;
-            }
+#warning ストラテジの必要性がなくなったのでアルゴリズム実装を見直し。
+            this._strategy = new TrimSubDirectory();
         }
         #endregion
 
@@ -66,13 +47,8 @@ namespace ImageTrimmingTool.App
                     @"トリミングしたい画像のパス（複数指定可）を渡します。" ),
                 Options = new List<DescriptionInfo>()
                 {
-                    new DescriptionInfo("app.config.Mode", "SUB-DIRECTORY / SWAP-FILE"),
-                    new DescriptionInfo("  .Mode[SUB-DIRECTORY]", "サブディレクトリを作成し、そこにトリミングしたファイルを保存します。"),
-                    new DescriptionInfo("    - SUB-DIRECTORY alt mode", "D / Directory / SubDirectory"),
-                    new DescriptionInfo("    - SUB-DIRECTORY alt mode", "C / Copy "),
-                    new DescriptionInfo("  .Mode[SWAP-FILE]", "トリミングした一時ファイルを作成し、オリジナルと差し替えます。（疑似上書き）"),
-                    new DescriptionInfo("    - SWAP-FILE alt mode", "F / File / SwapFile"),
-                    new DescriptionInfo("    - SWAP-FILE alt mode", "O / OverWrite"),
+                    new DescriptionInfo("パラメータJSON", "トリミングの詳細を指定します。"),
+#warning あとでJSONの説明を追記。
                 },
             };
 
@@ -133,8 +109,8 @@ namespace ImageTrimmingTool.App
             // ■まず普通に渡された args から JPEG/PNGファイルパス をチェック。
             files = arguments.AsParameters()
                 .Where( x => File.Exists( x ) )
-                .Where( x => Path.GetExtension( x ).ToLower().any( ".jpg", ".jpeg", ".png" ) )
                 .Select( x => new FileInfo( x ) )
+                .Where( x => x.isSupportedImageFile() )
                 .ToList();
             if ( 0 < files.Count ) return files;
 
@@ -149,7 +125,7 @@ namespace ImageTrimmingTool.App
                 {
                     files = dir.GetFiles()
                         .AsEnumerable()
-                        .Where( x => Path.GetExtension( x.Name ).ToLower().any( ".jpg", ".jpeg", ".png" ) )
+                        .Where( x => x.isSupportedImageFile() )
                         .ToList();
                     if ( 0 < files.Count ) return files;
                 }
@@ -172,7 +148,7 @@ namespace ImageTrimmingTool.App
                         // ウィザードでフォルダが指定された場合、JPEG/PNGファイルのリストを取得。
                         files = folder.GetFiles()
                             .AsEnumerable()
-                            .Where( x => Path.GetExtension( x.Name ).ToLower().any( ".jpg", ".jpeg", ".png" ) )
+                            .Where( x => x.isSupportedImageFile() )
                             .ToList();
                     } ) )
             {

@@ -13,22 +13,6 @@ namespace ImageTrimmingTool.App.Strategy
 {
     public abstract class BaseTrimFileStrategy
     {
-        private readonly ImageCodecInfo _encoder;
-        private readonly EncoderParameters _parameters;
-
-        public BaseTrimFileStrategy()
-        {
-            #region jpeg圧縮設定
-            // jpeg エンコーダの取得
-            _encoder = GetEncoder( ImageFormat.Jpeg );
-
-            // jpeg エンコードパラメータの設定
-            long quality = Trimming.Default.Quality;
-            _parameters = new EncoderParameters( 1 );
-            _parameters.Param[0] = new EncoderParameter( Encoder.Quality, quality );
-            #endregion
-        }
-
         public FileInfo Trim(FileInfo origin, TrimmingSetting setting)
         {
             FileInfo trimed = this.Before( origin );
@@ -101,19 +85,5 @@ namespace ImageTrimmingTool.App.Strategy
         /// <returns>最終的な出力ファイル</returns>
         protected abstract FileInfo After(FileInfo origin, FileInfo trimed);
 
-
-        /// <seealso cref="https://docs.microsoft.com/ja-jp/dotnet/framework/winforms/advanced/how-to-set-jpeg-compression-level"/>
-        private static ImageCodecInfo GetEncoder(ImageFormat format)
-        {
-            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
-            foreach ( ImageCodecInfo codec in codecs )
-            {
-                if ( codec.FormatID == format.Guid )
-                {
-                    return codec;
-                }
-            }
-            return null;
-        }
     }
 }
