@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,6 +17,11 @@ namespace ImageTrimmingTool
             }
 
             return false;
+        }
+
+        public static bool isSupportedImageFile( this FileInfo file )
+        {
+            return Path.GetExtension( file.Name ).ToLower().any( ".jpg", ".jpeg", ".png" );
         }
 
         public static int asInt(this string str) {

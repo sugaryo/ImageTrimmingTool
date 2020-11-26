@@ -25,19 +25,10 @@ namespace ImageTrimmingTool {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("90")]
-        public int Quality {
+        [global::System.Configuration.DefaultSettingValueAttribute("trim")]
+        public string SubDirectoryName {
             get {
-                return ((int)(this["Quality"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("D")]
-        public string ModeValue {
-            get {
-                return ((string)(this["ModeValue"]));
+                return ((string)(this["SubDirectoryName"]));
             }
         }
     }
