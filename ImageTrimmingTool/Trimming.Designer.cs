@@ -22,5 +22,14 @@ namespace ImageTrimmingTool {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("trim")]
+        public string SubDirectoryName {
+            get {
+                return ((string)(this["SubDirectoryName"]));
+            }
+        }
     }
 }

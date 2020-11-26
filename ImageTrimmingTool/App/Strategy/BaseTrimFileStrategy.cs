@@ -55,7 +55,7 @@ namespace ImageTrimmingTool.App.Strategy
                         }
                     }
 
-                    // dst.Save( trimed.FullName, _encoder, _parameters );
+
                     // .NET のJPEG Encoderを通すとどうしても画像がボヤける（品質１００でも無理だった）ので、取り敢えず素直にpngで出力するようにしておく。
                     dst.Save( trimed.FullName + ".png", ImageFormat.Png );
                 }

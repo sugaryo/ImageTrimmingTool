@@ -11,7 +11,7 @@ namespace ImageTrimmingTool.App.Strategy
     {
         protected override FileInfo Before(FileInfo origin)
         {
-            var subdir = origin.Directory.CreateSubdirectory( "trim" );
+            var subdir = origin.Directory.CreateSubdirectory( Trimming.Default.SubDirectoryName );
 
             string filename = Path.GetFileNameWithoutExtension( origin.Name );
             string filepath = Path.Combine( subdir.FullName, filename + ".png" );
