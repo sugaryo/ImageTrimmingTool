@@ -130,17 +130,17 @@ namespace ImageTrimmingTool.App
             List<FileInfo> files;
 
 
-            // ■まず普通に渡された args から JPEGファイルパス をチェック。
+            // ■まず普通に渡された args から JPEG/PNGファイルパス をチェック。
             files = arguments.AsParameters()
                 .Where( x => File.Exists( x ) )
-                .Where( x => Path.GetExtension( x ).ToLower().any( ".jpg", ".jpeg" ) )
+                .Where( x => Path.GetExtension( x ).ToLower().any( ".jpg", ".jpeg", ".png" ) )
                 .Select( x => new FileInfo( x ) )
                 .ToList();
             if ( 0 < files.Count ) return files;
 
 
-            // ■JPEGファイルが渡されてなかったら、次点で ディレクトリパス をチェック。（複数ある場合はFirstを優先して採用）
-            { 
+            // ■JPEG/PNGファイルが渡されてなかったら、次点で ディレクトリパス をチェック。（複数ある場合はFirstを優先して採用）
+            {
                 var dir = arguments.AsParameters()
                     .Where( x => Directory.Exists( x ) )
                     .Select( x => new DirectoryInfo( x ) )
@@ -149,7 +149,7 @@ namespace ImageTrimmingTool.App
                 {
                     files = dir.GetFiles()
                         .AsEnumerable()
-                        .Where( x => Path.GetExtension( x.Name ).ToLower().any( ".jpg", ".jpeg" ) )
+                        .Where( x => Path.GetExtension( x.Name ).ToLower().any( ".jpg", ".jpeg", ".png" ) )
                         .ToList();
                     if ( 0 < files.Count ) return files;
                 }
@@ -169,10 +169,10 @@ namespace ImageTrimmingTool.App
                                 // action.DirectoryInfo
                     ( folder ) =>
                     {
-                        // ウィザードでフォルダが指定された場合、JPEGファイルのリストを取得。
+                        // ウィザードでフォルダが指定された場合、JPEG/PNGファイルのリストを取得。
                         files = folder.GetFiles()
                             .AsEnumerable()
-                            .Where( x => Path.GetExtension( x.Name ).ToLower().any( ".jpg", ".jpeg" ) )
+                            .Where( x => Path.GetExtension( x.Name ).ToLower().any( ".jpg", ".jpeg", ".png" ) )
                             .ToList();
                     } ) )
             {

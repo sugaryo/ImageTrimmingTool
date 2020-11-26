@@ -13,7 +13,8 @@ namespace ImageTrimmingTool.App.Strategy
         {
             var subdir = origin.Directory.CreateSubdirectory( "trim" );
 
-            string filepath = Path.Combine( subdir.FullName, origin.Name );
+            string filename = Path.GetFileNameWithoutExtension( origin.Name );
+            string filepath = Path.Combine( subdir.FullName, filename + ".png" );
 
             return new FileInfo( filepath );
         }

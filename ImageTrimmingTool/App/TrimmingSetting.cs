@@ -11,6 +11,11 @@ namespace ImageTrimmingTool.App
 {
     public class TrimmingSetting
     {
+        public struct BorderSetting
+        {
+            public Color color;
+            public int width;
+        }
         public struct DrawSetting
         {
             public Size size;
@@ -18,6 +23,8 @@ namespace ImageTrimmingTool.App
             public int y;
             public int w;
             public int h;
+
+            public BorderSetting border;
         }
 
         public int? Width { get; set; }
@@ -40,11 +47,16 @@ namespace ImageTrimmingTool.App
         public int? PaddingLeft { get; set; }
 
 
+        public int? Border { get; set; }
+        [JsonProperty( PropertyName = "border-color" )]
+        public string BorderColor { get; set; } = "Black";
+
 
         public DrawSetting Compile( Size origin )
         {
             DrawSetting draw = new DrawSetting();
-            
+
+            #region 矩形トリミング用の領域設定
             // { top, right, bottom, left } を取得。
             // 優先順位：無印.xxx > padding-xxx > padding[]
             int[] padding = this.CompilePadding();
@@ -63,6 +75,22 @@ namespace ImageTrimmingTool.App
             int height = this.Height ?? draw.h;
 
             draw.size = new Size( width, height );
+            #endregion
+
+
+            #region 枠線オプション用の設定
+            if ( this.Border.HasValue && 0 != this.Border.Value )
+            {
+                draw.border.color = Color.FromName( this.BorderColor );
+                draw.border.width = this.Border.Value;
+            }
+            else
+            {
+                draw.border.color = Color.Transparent;
+                draw.border.width = 0;
+            }
+            #endregion
+
 
             return draw;
         }

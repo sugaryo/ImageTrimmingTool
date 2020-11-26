@@ -17,9 +17,13 @@ namespace ImageTrimmingTool.App.Strategy
 
         protected override FileInfo After(FileInfo origin, FileInfo trimed)
         {
+#warning こうなってくるとSWAPモード必要ない説。
+            string filename = Path.GetFileNameWithoutExtension( origin.Name );
+            string filepath = Path.Combine( origin.Directory.FullName, filename + ".png" );
+
             // ファイルをスワップする。
             File.Delete( origin.FullName );
-            File.Move( trimed.FullName, origin.FullName );
+            File.Move( trimed.FullName, filepath );
 
             return origin;
         }
