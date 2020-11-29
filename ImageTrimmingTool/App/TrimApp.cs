@@ -3,17 +3,13 @@ using CliToolTemplate;
 using CliToolTemplate.Description;
 using CliToolTemplate.Utility;
 
-using Newtonsoft.Json;
-
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using ImageTrimmingTool.App.Strategy;
+using ImageTrimmingTool.App.Utility;
 
-using Encoder = System.Drawing.Imaging.Encoder;
 
 namespace ImageTrimmingTool.App
 {
@@ -77,26 +73,45 @@ namespace ImageTrimmingTool.App
 
             // ■トリミング領域入力
             // ※ コンソールからの自由入力は一旦機能削除。
-            TrimmingSetting area = null;
-            if (  _wizzard.TryInputOrPath( new[] { 
-                        "トリミング領域を定義したJSONファイルパスを指定してください。",
-                        "若しくはJSON文字列をそのまま入力",
-                        @"( input ""exit"" to exit )" 
+            if ( !_wizzard.TryInputOrPath( 
+                    // メッセージ：
+                    new[] {
+                        $"■変換ファイル - {files.Count}■",
+                        "■詳細入力■",
+                        "- TrimParameterJSON を定義したファイルパスを入力。",
+                        "- 若しくは TrimParameterJSON文字列 をそのまま入力。",
+                        "- その他のオプション",
+                        "    - input `--jpeg` to convert file to JPEG format." ,
+                        "    - input `exit` to exit.",
                     },
+                    // 直接入力：
                     ( input ) =>
                     {
-                        System.Diagnostics.Debug.WriteLine( $"[debug] JSON入力 : {input}" );
-                        area = TrimmingSetting.Parse( input );
+                        if ( "--jpeg" == input.ToLower() )
+                        {
+                            System.Diagnostics.Debug.WriteLine( $"[debug] ★ JPEG 変換モード" );
+                            this.Jpeg( files );
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine( $"[debug] ★ JSON入力 : {input}" );
+                            var area = TrimParameterJSON.Parse( input );
+                            this.Trim( files, area );
+                        }
                     },
+                    // ファイルパス入力：
                     ( path ) =>
                     {
-                        System.Diagnostics.Debug.WriteLine( $"[debug] パス入力 : {path}" );
+                        System.Diagnostics.Debug.WriteLine( $"[debug] ★ パス入力 : {path}" );
                         string json = File.ReadAllText( path );
-                        area = TrimmingSetting.Parse( json );
+                        var area = TrimParameterJSON.Parse( json );
+                        this.Trim( files, area );
                     } 
                     ) )
+            // キャンセル：
             {
-                this.Trim( area, files );
+                Console.WriteLine();
+                Console.WriteLine( "【！】処理中断：キャンセルされました【！】" );
             }
         }
         #endregion
@@ -161,7 +176,8 @@ namespace ImageTrimmingTool.App
             return new List<FileInfo>();
         }
 
-        private void Trim(TrimmingSetting area, IEnumerable<FileInfo> files)
+        // メインのトリミング処理、詳細はTrimParameterJSONの指定に基づく。
+        private void Trim(IEnumerable<FileInfo> files, TrimParameterJSON area)
         {
             foreach ( var file in files )
             {
@@ -174,5 +190,18 @@ namespace ImageTrimmingTool.App
             }
         }
 
+        // このツールに乗せるより別ツール作った方が良いと思うが、JPEGコンバータを追加。
+        private void Jpeg(IEnumerable<FileInfo> files)
+        {
+            foreach ( var file in files )
+            {
+                var jpg = file.convert();
+
+
+                Console.WriteLine( "convert jpeg format." );
+                Console.WriteLine( $"  - [origin] {file.FullName}" );
+                Console.WriteLine( $"  - [trimed] {jpg.FullName}" );
+            }
+        }
     }
 }

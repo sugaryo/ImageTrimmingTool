@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 
 namespace ImageTrimmingTool.App
 {
-    public class TrimmingSetting
+    public class TrimParameterJSON
     {
         public struct BorderSetting
         {
@@ -123,10 +123,10 @@ namespace ImageTrimmingTool.App
         
 
 
-        public static TrimmingSetting Parse(string json)
+        public static TrimParameterJSON Parse(string json)
         {
             Console.WriteLine( json );
-            var obj = JsonConvert.DeserializeObject<TrimmingSetting>( json );
+            var obj = JsonConvert.DeserializeObject<TrimParameterJSON>( json );
 
             System.Diagnostics.Debug.WriteLine( "[debug] size" );
             System.Diagnostics.Debug.WriteLine( $"  - Width   : {obj.Width}" );
