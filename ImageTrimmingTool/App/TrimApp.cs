@@ -81,20 +81,34 @@ namespace ImageTrimmingTool.App
                         "- TrimParameterJSON を定義したファイルパスを入力。",
                         "- 若しくは TrimParameterJSON文字列 をそのまま入力。",
                         "- その他のオプション",
-                        "    - input `--jpeg` to convert file to JPEG format." ,
+                        "    - input `--jpeg(--<quality:int>)` to convert file to JPEG format." ,
                         "    - input `exit` to exit.",
                     },
                     // 直接入力：
                     ( input ) =>
                     {
-                        if ( "--jpeg" == input.ToLower() )
+                        string lower = input.ToLower();
+                        if ( "--jpeg" == lower )
                         {
                             System.Diagnostics.Debug.WriteLine( $"[debug] ★ JPEG 変換モード" );
+                            Console.WriteLine( "■JPEG変換■" );
+
                             this.Jpeg( files );
+                        }
+                        else if ( lower.startsWith( "--jpeg--" ) )
+                        {
+                            int q = lower.Substring( "--jpeg--".Length ).asInt();
+
+                            System.Diagnostics.Debug.WriteLine( $"[debug] ★ JPEG 変換モード[Q={q}]" );
+                            Console.WriteLine( $"■JPEG変換[Q={q}]■" );
+
+                            this.Jpeg( files, q );
                         }
                         else
                         {
                             System.Diagnostics.Debug.WriteLine( $"[debug] ★ JSON入力 : {input}" );
+                            Console.WriteLine( "■Trim処理■" );
+
                             var area = TrimParameterJSON.Parse( input );
                             this.Trim( files, area );
                         }
@@ -103,6 +117,8 @@ namespace ImageTrimmingTool.App
                     ( path ) =>
                     {
                         System.Diagnostics.Debug.WriteLine( $"[debug] ★ パス入力 : {path}" );
+                        Console.WriteLine( "■Trim処理■" );
+
                         string json = File.ReadAllText( path );
                         var area = TrimParameterJSON.Parse( json );
                         this.Trim( files, area );
@@ -191,11 +207,11 @@ namespace ImageTrimmingTool.App
         }
 
         // このツールに乗せるより別ツール作った方が良いと思うが、JPEGコンバータを追加。
-        private void Jpeg(IEnumerable<FileInfo> files)
+        private void Jpeg(IEnumerable<FileInfo> files, long quality = 100)
         {
             foreach ( var file in files )
             {
-                var jpg = file.convert();
+                var jpg = file.convert( quality );
 
 
                 Console.WriteLine( "convert jpeg format." );
