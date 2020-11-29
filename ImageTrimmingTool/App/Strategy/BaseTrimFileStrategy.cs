@@ -7,13 +7,11 @@ using System.Threading.Tasks;
 using System.Drawing;
 using System.Drawing.Imaging;
 
-using Encoder = System.Drawing.Imaging.Encoder;
-
 namespace ImageTrimmingTool.App.Strategy
 {
     public abstract class BaseTrimFileStrategy
     {
-        public FileInfo Trim(FileInfo origin, TrimmingSetting setting)
+        public FileInfo Trim(FileInfo origin, TrimParameterJSON setting)
         {
             FileInfo trimed = this.Before( origin );
 
@@ -21,7 +19,7 @@ namespace ImageTrimmingTool.App.Strategy
             #region イメージのトリミング処理 { origin -> trimed }
             using ( Bitmap src = new Bitmap( origin.FullName ) )
             {
-                TrimmingSetting.DrawSetting draw = setting.Compile( src.Size );
+                TrimParameterJSON.DrawSetting draw = setting.Compile( src.Size );
 
                 using ( Bitmap dst = new Bitmap( draw.size.Width, draw.size.Height ) )
                 {
