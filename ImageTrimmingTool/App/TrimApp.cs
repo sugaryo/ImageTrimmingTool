@@ -81,7 +81,7 @@ namespace ImageTrimmingTool.App
                         "- TrimParameterJSON を定義したファイルパスを入力。",
                         "- 若しくは TrimParameterJSON文字列 をそのまま入力。",
                         "- その他のオプション",
-                        "    - input `--jpeg(--<quality:int>)` to convert file to JPEG format." ,
+                        "    - input `--jpeg(--<quality:int>)` to convert JPEG format." ,
                         "    - input `exit` to exit.",
                     },
                     // 直接入力：
@@ -202,7 +202,7 @@ namespace ImageTrimmingTool.App
 
                 Console.WriteLine( "trim." );
                 Console.WriteLine( $"  - [origin] {file.FullName}" );
-                Console.WriteLine( $"  - [trimed] {trimed.FullName}" );
+                Console.WriteLine( $"  - [  trim] {trimed.FullName}" );
             }
         }
 
@@ -216,7 +216,7 @@ namespace ImageTrimmingTool.App
 
                 Console.WriteLine( "convert jpeg format." );
                 Console.WriteLine( $"  - [origin] {file.FullName}" );
-                Console.WriteLine( $"  - [trimed] {jpg.FullName}" );
+                Console.WriteLine( $"  - [  jpeg] {jpg.FullName}" );
             }
         }
     }
