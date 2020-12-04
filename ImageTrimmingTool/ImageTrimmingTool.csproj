@@ -60,6 +60,7 @@
     <Compile Include="App\TrimParameterJSON.cs" />
     <Compile Include="App\Utility\JPEG.cs" />
     <Compile Include="App\extensions.cs" />
+    <Compile Include="App\Utility\Option.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Trimming.Designer.cs">

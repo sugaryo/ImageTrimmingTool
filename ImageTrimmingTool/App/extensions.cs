@@ -9,6 +9,15 @@ namespace ImageTrimmingTool.App
 {
     public static class extensions
     {
+        public static string[] split(this string str, params string[] by)
+        {
+            return str.Split( by, StringSplitOptions.None );
+        }
+        public static string[] split(this string str, StringSplitOptions option = StringSplitOptions.None, params string[] by)
+        {
+            return str.Split( by, option );
+        }
+
         public static bool any(this string str, params string[] strings) {
 
             foreach (var x in strings)
@@ -24,8 +33,14 @@ namespace ImageTrimmingTool.App
             return Path.GetExtension( file.Name ).ToLower().any( ".jpg", ".jpeg", ".png", ".bmp" );
         }
 
-        public static int asInt(this string str) {
-            return int.Parse(str);
+        public static int asInt(this string str)
+        {
+            return int.Parse( str );
+        }
+        public static int asInt(this string str, int alt)
+        {
+            int val;
+            return int.TryParse( str, out val ) ? val : alt;
         }
 
 

@@ -59,6 +59,7 @@ namespace ImageTrimmingTool.App
             List<FileInfo> files = this.AnalizeInputFiles( arguments );
             if ( 0 == files.Count )
             {
+                #region ヘルプ表示
                 Console.WriteLine();
                 Console.WriteLine( "【！】処理中断：入力ファイルなし【！】" );
                 Console.WriteLine();
@@ -67,68 +68,82 @@ namespace ImageTrimmingTool.App
                 Console.WriteLine();
                 Console.WriteLine();
                 base.ShowHelp();
+                #endregion
                 return;
             }
 
 
             // ■トリミング領域入力
             // ※ コンソールからの自由入力は一旦機能削除。
-            if ( !_wizzard.TryInputOrPath( 
-                    // メッセージ：
-                    new[] {
-                        $"■変換ファイル - {files.Count}■",
-                        "■詳細入力■",
-                        "- TrimParameterJSON を定義したファイルパスを入力。",
-                        "- 若しくは TrimParameterJSON文字列 をそのまま入力。",
-                        "- その他のオプション",
-                        "    - input `--jpeg(--<quality:int>)` to convert JPEG format." ,
-                        "    - input `exit` to exit.",
-                    },
-                    // 直接入力：
-                    ( input ) =>
-                    {
-                        string lower = input.ToLower();
-                        if ( "--jpeg" == lower )
-                        {
-                            System.Diagnostics.Debug.WriteLine( $"[debug] ★ JPEG 変換モード" );
-                            Console.WriteLine( "■JPEG変換■" );
-
-                            this.Jpeg( files );
-                        }
-                        else if ( lower.startsWith( "--jpeg--" ) )
-                        {
-                            int q = lower.Substring( "--jpeg--".Length ).asInt();
-
-                            System.Diagnostics.Debug.WriteLine( $"[debug] ★ JPEG 変換モード[Q={q}]" );
-                            Console.WriteLine( $"■JPEG変換[Q={q}]■" );
-
-                            this.Jpeg( files, q );
-                        }
-                        else
-                        {
-                            System.Diagnostics.Debug.WriteLine( $"[debug] ★ JSON入力 : {input}" );
-                            Console.WriteLine( "■Trim処理■" );
-
-                            var area = TrimParameterJSON.Parse( input );
-                            this.Trim( files, area );
-                        }
-                    },
-                    // ファイルパス入力：
-                    ( path ) =>
-                    {
-                        System.Diagnostics.Debug.WriteLine( $"[debug] ★ パス入力 : {path}" );
-                        Console.WriteLine( "■Trim処理■" );
-
-                        string json = File.ReadAllText( path );
-                        var area = TrimParameterJSON.Parse( json );
-                        this.Trim( files, area );
-                    } 
-                    ) )
-            // キャンセル：
+            if ( !_wizzard.TryInputOrPath(
+                    new [] {
+                            $"■変換ファイル - {files.Count}■",
+                            "■詳細入力■",
+                            "- TrimParameterJSON を定義したファイルパスを入力。",
+                            "- 若しくは TrimParameterJSON文字列 をそのまま入力。",
+                            "- その他のオプション",
+                            "    - input `--jpeg(--<quality:int>)` to convert JPEG format." ,
+                            "    - input `exit` to exit.",
+                    }
+                    , ( input ) => { this.InputCallback( files, input ); }
+                    , ( path  ) => { this.PathCallback( files, path ); }
+                ) )
             {
                 Console.WriteLine();
                 Console.WriteLine( "【！】処理中断：キャンセルされました【！】" );
             }
+        }
+        private void InputCallback(IEnumerable<FileInfo> files, string input)
+        {
+            // ■オプション入力
+            if ( input.startsWith( "--" ) )
+            {
+                var option = new Option( input.ToLower() );
+
+                if ( option.Has( "jpeg", "jpg" ) )
+                {
+                    string value;
+                    if ( option.Match( "[0-9]+", out value ) )
+                    {
+                        int q = value.asInt();
+
+                        System.Diagnostics.Debug.WriteLine( $"[debug] ★ JPEG 変換モード[Q={q}]" );
+                        Console.WriteLine( $"■JPEG変換[Q={q}]■" );
+
+                        this.Jpeg( files, q );
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine( $"[debug] ★ JPEG 変換モード" );
+                        Console.WriteLine( "■JPEG変換■" );
+
+                        this.Jpeg( files );
+                    }
+                }
+                else
+                {
+                    Console.WriteLine();
+                    Console.WriteLine( "unknown option." );
+                }
+            }
+            // ■JSON入力
+            else
+            {
+                System.Diagnostics.Debug.WriteLine( $"[debug] ★ JSON入力 : {input}" );
+                Console.WriteLine( "■Trim処理■" );
+
+                var area = TrimParameterJSON.Parse( input );
+                this.Trim( files, area );
+            }
+        }
+        private void PathCallback(IEnumerable<FileInfo> files, string path)
+        {
+            System.Diagnostics.Debug.WriteLine( $"[debug] ★ パス入力 : {path}" );
+            Console.WriteLine( "■Trim処理■" );
+
+            string json = File.ReadAllText( path );
+            var area = TrimParameterJSON.Parse( json );
+            this.Trim( files, area );
         }
         #endregion
 
