@@ -14,7 +14,7 @@ namespace ImageTrimmingTool.App.Utility
     public static class JPEG
     {
 
-        public static FileInfo convert(this FileInfo file, long quality = 100)
+        public static FileInfo cnvjpg(this FileInfo file, long quality = 100)
         {
             string path = Path.Combine( file.directory(), file.filename( ".jpg" ) );
 
