@@ -171,6 +171,7 @@ namespace ImageTrimmingTool.App
             {
                 var option = new Option( input.ToLower() );
 
+                // png -> jpg 変換機能
                 if ( option.Has( "jpeg", "jpg" ) )
                 {
                     string value;
@@ -205,7 +206,7 @@ namespace ImageTrimmingTool.App
                 System.Diagnostics.Debug.WriteLine( $"[debug] ★ JSON入力 : {input}" );
                 Console.WriteLine( "■Trim処理■" );
 
-                var area = TrimParameterJSON.Parse( input );
+                var area = TrimParameterJSON.Parse( input.fuzzy() );
                 this.Trim( files, area );
             }
             #endregion
@@ -227,7 +228,7 @@ namespace ImageTrimmingTool.App
             Console.WriteLine( "■Trim処理■" );
 
             string json = File.ReadAllText( path );
-            var area = TrimParameterJSON.Parse( json );
+            var area = TrimParameterJSON.Parse( json.fuzzy() );
             this.Trim( files, area );
         }
         #endregion
