@@ -58,6 +58,7 @@
     <Compile Include="App\Strategy\TrimSwapFile.cs" />
     <Compile Include="App\TrimApp.cs" />
     <Compile Include="App\TrimParameterJSON.cs" />
+    <Compile Include="App\Utility\FuzzyJSON.cs" />
     <Compile Include="App\Utility\JPEG.cs" />
     <Compile Include="App\extensions.cs" />
     <Compile Include="App\Utility\Option.cs" />

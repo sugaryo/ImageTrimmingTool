@@ -125,25 +125,12 @@ namespace ImageTrimmingTool.App
 
         public static TrimParameterJSON Parse(string json)
         {
+#warning TODO：ここでJSONモドキを受け付けるFuzzyJSON対応したい。
+
+
             Console.WriteLine( json );
             var obj = JsonConvert.DeserializeObject<TrimParameterJSON>( json );
 
-            System.Diagnostics.Debug.WriteLine( "[debug] size" );
-            System.Diagnostics.Debug.WriteLine( $"  - Width   : {obj.Width}" );
-            System.Diagnostics.Debug.WriteLine( $"  - Height  : {obj.Height}" );
-
-            System.Diagnostics.Debug.WriteLine( "[debug] trim" );
-            System.Diagnostics.Debug.WriteLine( $"  - left    : {obj.Left}" );
-            System.Diagnostics.Debug.WriteLine( $"  - right   : {obj.Right}" );
-            System.Diagnostics.Debug.WriteLine( $"  - top     : {obj.Top}" );
-            System.Diagnostics.Debug.WriteLine( $"  - bottom  : {obj.Bottom}" );
-
-            System.Diagnostics.Debug.WriteLine( "[debug] padding" );
-            System.Diagnostics.Debug.WriteLine( $"  - p       : {obj.Padding}" );
-            System.Diagnostics.Debug.WriteLine( $"  - p.top   : {obj.PaddingTop}" );
-            System.Diagnostics.Debug.WriteLine( $"  - p.right : {obj.PaddingRight}" );
-            System.Diagnostics.Debug.WriteLine( $"  - p.bottom: {obj.PaddingBottom}" );
-            System.Diagnostics.Debug.WriteLine( $"  - p.left  : {obj.PaddingLeft}" );
             return obj;
         }
 
