@@ -86,18 +86,22 @@ namespace ImageTrimmingTool.App
             }
 
 
+
 #warning このパターンいるかな？？？
 
             // ■パラメータで入力ファイルが渡されなかった場合、ウィザードでフォルダ指定する。
+            Option option = null;
             if ( _wizzard.TryInputOrPath(
                     new[] {
                             "ファイルが渡されなかったのでフォルダを指定スルノダ。",
                             @"( input ""exit"" to exit )",
                     },
-                    (_) => { }, // action.path     (nop)
-                    (_) => { }, // action.FileInfo (nop)
-                                // action.DirectoryInfo
-                    (folder) =>
+                    ( input ) =>
+                    {
+                        option = new Option( input.ToLower() );
+                    },
+                    (_) => { },
+                    ( folder ) =>
                     {
                         // ウィザードでフォルダが指定された場合、JPEG/PNGファイルのリストを取得。
                         files = folder.GetFiles()
@@ -106,13 +110,23 @@ namespace ImageTrimmingTool.App
                             .ToList();
                     } ) )
             {
+                // フォルダを指定されて JPEG/PNG ファイルが有ればそれを返す。
                 if ( 0 < files.Count ) return files;
             }
-
-
             // ■いずれの方法でも入力ファイルが特定されなかったら空のリストを返す（処理終了）
             System.Diagnostics.Debug.WriteLine( "入力ファイルなし。" );
-            return new List<FileInfo>();
+            files = new List<FileInfo>();
+
+            if ( null != option 
+                && ( option.Has( "test" ) || option.Has( "help" ) ) )
+            {
+                if ( option.Has( "fuzzy-json" ) || option.Has( "jzon" ) )
+                {
+                    this.JZON();
+                }
+            }
+
+            return files;
         }
         protected override void Execute(Arguments arguments)
         {
@@ -261,6 +275,43 @@ namespace ImageTrimmingTool.App
                 Console.WriteLine( "convert jpeg format." );
                 Console.WriteLine( $"  - [origin] {file.FullName}" );
                 Console.WriteLine( $"  - [  jpeg] {jpg.FullName}" );
+            }
+        }
+        #endregion
+
+        #region JZON
+        // fuzzy-json のテスト兼サンプル表示
+        private void JZON()
+        {
+#warning 出力をもう少し工夫したいが一旦これで。
+            string[] inputs = {
+                "padding:123",
+                @"""hoge"":""moge""",
+                @"""num"":999",
+                "xxx : 1234567890",
+                "yyy : 1234567890,",
+                "zzz : 1234567890;",
+                "top:11;right:22;bottom:33;left:44",
+                "top:55,right:66,bottom:77,left:88",
+                "X : 123, Y : 456, Z : 789",
+                "A : 111; B : 222; C : 333",
+                "D : 444, E : 555, F : 666,",
+                "G : 777; H : 888; I : 999;",
+                "  key    :    value      ;  ",
+                "  key:        value      ;  ",
+                "  key        :value      ;  ",
+                "key=value",
+                "key=value,",
+                "key=value;",
+            };
+
+            Console.WriteLine( "FUZZY JSON の入出力パターン" );
+            int n = 0;
+            foreach ( var json in inputs )
+            {
+                Console.WriteLine( $"- sample[{++n}]" );
+                Console.WriteLine( $"    $ {json}" );
+                Console.WriteLine( $"    > {json.fuzzy()}" );
             }
         }
         #endregion
