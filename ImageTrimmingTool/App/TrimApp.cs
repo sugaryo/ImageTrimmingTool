@@ -69,6 +69,30 @@ namespace ImageTrimmingTool.App
 
         #region ConsoleAppBase::Execute 実装（メインロジック）
 
+        protected override void Execute(Arguments arguments)
+        {
+            // ■入力ファイルリストを取得
+            List<FileInfo> files = this.AnalizeInputFiles( arguments );
+
+            // 有効な入力ファイルが得られなかったらヘルプ表示して終わり。
+            if ( 0 == files.Count )
+            {
+                Console.WriteLine();
+                Console.WriteLine( "【！】処理中断：入力ファイルなし【！】" );
+                Console.WriteLine();
+                Console.WriteLine( "特にやることも無いのでヘルプを表示します。" );
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine();
+                base.ShowHelp();
+            }
+            // 有効な入力ファイルが渡されたらトリミング条件を受け付けて処理。
+            else
+            {
+                this.Execute( files );
+            }
+        }
+
         #region AnalizeInputFiles
         private List<FileInfo> AnalizeInputFiles(Arguments arguments)
         {
@@ -144,30 +168,6 @@ namespace ImageTrimmingTool.App
             return files;
         }
         #endregion
-
-        protected override void Execute(Arguments arguments)
-        {
-            // ■入力ファイルリストを取得
-            List<FileInfo> files = this.AnalizeInputFiles( arguments );
-
-            // 有効な入力ファイルが得られなかったらヘルプ表示して終わり。
-            if ( 0 == files.Count )
-            {
-                Console.WriteLine();
-                Console.WriteLine( "【！】処理中断：入力ファイルなし【！】" );
-                Console.WriteLine();
-                Console.WriteLine( "特にやることも無いのでヘルプを表示します。" );
-                Console.WriteLine();
-                Console.WriteLine();
-                Console.WriteLine();
-                base.ShowHelp();
-            }
-            // 有効な入力ファイルが渡されたらトリミング条件を受け付けて処理。
-            else
-            {
-                this.Execute( files );
-            }
-        }
 
         #region Execute / Callback
 
