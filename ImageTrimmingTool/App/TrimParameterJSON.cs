@@ -125,12 +125,9 @@ namespace ImageTrimmingTool.App
 
         public static TrimParameterJSON Parse(string json)
         {
-#warning TODO：ここでJSONモドキを受け付けるFuzzyJSON対応したい。
+            System.Diagnostics.Debug.WriteLine( json );
 
-
-            Console.WriteLine( json );
             var obj = JsonConvert.DeserializeObject<TrimParameterJSON>( json );
-
             return obj;
         }
 
