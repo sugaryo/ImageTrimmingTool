@@ -12,7 +12,7 @@ namespace ImageTrimmingTool {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.9.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.2.0.0")]
     internal sealed partial class Trimming : global::System.Configuration.ApplicationSettingsBase {
         
         private static Trimming defaultInstance = ((Trimming)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Trimming())));
@@ -29,6 +29,15 @@ namespace ImageTrimmingTool {
         public string SubDirectoryName {
             get {
                 return ((string)(this["SubDirectoryName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("config.json")]
+        public string TrimConfigPath {
+            get {
+                return ((string)(this["TrimConfigPath"]));
             }
         }
     }
