@@ -17,7 +17,10 @@ namespace ImageTrimmingTool.App
     {
         private readonly InputWizzard _wizzard;
 
+#warning ストラテジの必要性がなくなったのでアルゴリズム実装を見直し。
         private readonly BaseTrimFileStrategy _strategy;
+
+        private readonly TrimConfig _config;
 
 
         #region ctor
@@ -25,8 +28,18 @@ namespace ImageTrimmingTool.App
         {
             this._wizzard = new InputWizzard( new[] { "exit" } );
 
-#warning ストラテジの必要性がなくなったのでアルゴリズム実装を見直し。
+
             this._strategy = new TrimSubDirectory();
+
+
+            // 定義済みパラメータファイルの事前読み込み
+            System.Diagnostics.Debug.WriteLine( Trimming.Default.TrimConfigPath );
+            this._config = new TrimConfig();
+            int n = this._config.Load( Trimming.Default.TrimConfigPath );
+            // 定義済みパラメータファイルの事前読み込み結果
+            System.Diagnostics.Debug.WriteLine( $"defined config parmeters ({n})." );
+            Console.WriteLine( $"defined config parmeters ({n})." );
+            this._config.Names.ForEach( name => Console.WriteLine( $"  - {name}" ) );
         }
         #endregion
 
@@ -55,6 +68,8 @@ namespace ImageTrimmingTool.App
 
 
         #region ConsoleAppBase::Execute 実装（メインロジック）
+
+        #region AnalizeInputFiles
         private List<FileInfo> AnalizeInputFiles(Arguments arguments)
         {
             List<FileInfo> files;
@@ -128,6 +143,8 @@ namespace ImageTrimmingTool.App
 
             return files;
         }
+        #endregion
+
         protected override void Execute(Arguments arguments)
         {
             // ■入力ファイルリストを取得
@@ -151,17 +168,21 @@ namespace ImageTrimmingTool.App
                 this.Execute( files );
             }
         }
+
+        #region Execute / Callback
+
         private void Execute(List<FileInfo> files)
         {
             if ( _wizzard.TryInputOrPath(
                     new[] {
                             $"■変換ファイル - {files.Count}■",
-                            "■詳細入力■",
-                            "- TrimParameterJSON を定義したファイルパスを入力。",
-                            "- 若しくは TrimParameterJSON文字列 をそのまま入力。",
-                            "- その他のオプション",
-                            "    - input `--jpeg(--<quality:int>)` to convert JPEG format." ,
-                            "    - input `exit` to exit.",
+                            "【基本機能】",
+                            "    1. TrimParameterJSON を定義した .json ファイルパスを入力。",
+                            "    2. `config:{name}` で 定義済みTrimParameterJSON名 を入力。",
+                            "    3. 若しくは TrimParameterJSON文字列 をそのまま入力。",
+                            "【その他のオプション機能】",
+                            "    - `--jpeg(--<quality:int>)` to convert JPEG format." ,
+                            "    - `exit` to exit.",
                     }
                     // テキスト入力
                     , ( input ) => { this.ExecuteInputCallback( files, input ); }
@@ -214,21 +235,50 @@ namespace ImageTrimmingTool.App
             };
             #endregion
 
+            #region InputConfig
+            void InputConfig(string name)
+            {
+                var parameter = this._config[name];
+                if ( null != parameter )
+                {
+                    System.Diagnostics.Debug.WriteLine( $"[debug] ★ Config入力 : {name}" );
+                    Console.WriteLine( $"■Trim処理 config[{name}]■" );
+
+                    this.Trim( files, parameter );
+                }
+                else
+                {
+                    Console.WriteLine();
+                    Console.WriteLine( "undefined config name." );
+                }
+            }
+            #endregion
+
             #region InputJSON
             void InputJSON()
             {
                 System.Diagnostics.Debug.WriteLine( $"[debug] ★ JSON入力 : {input}" );
                 Console.WriteLine( "■Trim処理■" );
 
-                var area = TrimParameterJSON.Parse( input.fuzzy() );
-                this.Trim( files, area );
+                string json = input.fuzzy();
+                Console.WriteLine( json );
+
+                var parameter = TrimParameterJSON.Parse( json );
+                this.Trim( files, parameter );
             }
             #endregion
+
 
             // ■オプション入力
             if ( input.startsWith( "--" ) )
             {
                 InputOption();
+            }
+            // ■config入力
+            else if ( input.startsWith( "config:" ) )
+            {
+                string name = input.Substring( "config:".Length );
+                InputConfig( name );
             }
             // ■JSON入力
             else
@@ -241,19 +291,22 @@ namespace ImageTrimmingTool.App
             System.Diagnostics.Debug.WriteLine( $"[debug] ★ パス入力 : {path}" );
             Console.WriteLine( "■Trim処理■" );
 
-            string json = File.ReadAllText( path );
-            var area = TrimParameterJSON.Parse( json.fuzzy() );
-            this.Trim( files, area );
+            string json = File.ReadAllText( path ).fuzzy();
+            var parameter = TrimParameterJSON.Parse( json );
+            this.Trim( files, parameter );
         }
+        
+        #endregion
+        
         #endregion
 
         #region Trim
         // メインのトリミング処理、詳細はTrimParameterJSONの指定に基づく。
-        private void Trim(IEnumerable<FileInfo> files, TrimParameterJSON area)
+        private void Trim(IEnumerable<FileInfo> files, TrimParameterJSON parameter)
         {
             foreach ( var file in files )
             {
-                var trimed = _strategy.Trim( file, area );
+                var trimed = _strategy.Trim( file, parameter );
 
 
                 Console.WriteLine( "trim." );
