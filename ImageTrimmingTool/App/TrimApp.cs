@@ -188,6 +188,8 @@ namespace ImageTrimmingTool.App
                     , ( input ) => { this.ExecuteInputCallback( files, input ); }
                     // パス入力
                     , ( path ) => { this.ExecutePathCallback( files, path ); }
+                    // 定義済みTrimParameterJSON の入力補完指定
+                    , new TabCompletion( _config.Names.Select( x => "config:" + x ) )
                 ) )
             {
                 // 後処理は特になし。
