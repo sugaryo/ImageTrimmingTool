@@ -15,6 +15,8 @@ namespace ImageTrimmingTool.App
 {
     public class TrimApp : ConsoleAppBase
     {
+        private const long DEFAULT_JPG_QUALITY = 100;
+
         private readonly InputWizzard _wizzard;
 
 #warning ストラテジの必要性がなくなったのでアルゴリズム実装を見直し。
@@ -188,8 +190,13 @@ namespace ImageTrimmingTool.App
                     , ( input ) => { this.ExecuteInputCallback( files, input ); }
                     // パス入力
                     , ( path ) => { this.ExecutePathCallback( files, path ); }
-                    // 定義済みTrimParameterJSON の入力補完指定
-                    , new TabCompletion( _config.Names.Select( x => "config:" + x ) )
+                    // [TAB] 入力補完
+                    , new TabCompletion( _config.Names
+                            // 定義済みTrimParameterJSON の入力補完指定
+                            .Select( x => "config:" + x )
+                            // オプション
+                            .Concat( new[] { "--jpg" } )
+                    )
                 ) )
             {
                 // 後処理は特になし。
@@ -217,15 +224,13 @@ namespace ImageTrimmingTool.App
                         int q = value.asInt();
 
                         System.Diagnostics.Debug.WriteLine( $"[debug] ★ JPEG 変換モード[Q={q}]" );
-                        Console.WriteLine( $"■JPEG変換[Q={q}]■" );
-
+                        
                         this.Jpeg( files, q );
                     }
                     else
                     {
                         System.Diagnostics.Debug.WriteLine( $"[debug] ★ JPEG 変換モード" );
-                        Console.WriteLine( "■JPEG変換■" );
-
+                        
                         this.Jpeg( files );
                     }
                 }
@@ -320,8 +325,9 @@ namespace ImageTrimmingTool.App
 
         #region Jpeg
         // このツールに乗せるより別ツール作った方が良いと思うが、JPEGコンバータを追加。
-        private void Jpeg(IEnumerable<FileInfo> files, long quality = 100)
+        private void Jpeg(IEnumerable<FileInfo> files, long quality = DEFAULT_JPG_QUALITY)
         {
+            Console.WriteLine( $"■JPEG変換-[Q:{quality}]■" );
             foreach ( var file in files )
             {
                 var jpg = file.cnvjpg( quality );
