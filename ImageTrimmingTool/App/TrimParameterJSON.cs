@@ -100,11 +100,10 @@ namespace ImageTrimmingTool.App
             string padding = this.Padding ?? "0 0 0 0";
 
             var token = padding
-                    .Split( new[] { ' ' } )
+                    .split( " " )
                     .AsEnumerable()
-                    .Select( x => int.Parse( x ) )
+                    .Select( x => x.asInt() )
                     .ToList();
-
 
             switch ( token.Count )
             {

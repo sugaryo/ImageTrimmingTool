@@ -35,12 +35,11 @@ namespace ImageTrimmingTool.App
 
         public static int asInt(this string str)
         {
-            return int.Parse( str );
+            return str.asInt( 0 );
         }
         public static int asInt(this string str, int alt)
         {
-            int val;
-            return int.TryParse( str, out val ) ? val : alt;
+            return int.TryParse( str, out int val ) ? val : alt;
         }
 
 
