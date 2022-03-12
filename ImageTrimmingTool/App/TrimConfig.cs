@@ -27,16 +27,22 @@ namespace ImageTrimmingTool.App
             var map = this.Read( path );
             foreach ( var itor in map )
             {
-                string name = itor.Key;    // パラメータファイルの識別名
-                string file = itor.Value;  // パラメータファイルのパス
+                string name = itor.Key;    // パラメータの識別名
+                string text = itor.Value;  // パラメータの定義ファイルパス、若しくは JZON直値
 
-                // 指定されたパラメータファイルがあればJSON定義を読み込む。
-                if ( File.Exists( file ) )
-                { 
-                    string json = File.ReadAllText( file ).fuzzy();
-                    var parameter = TrimParameterJSON.Parse( json );
-
+                // 指定されたパラメータファイルがあれば JSON定義 を読み込む。
+                // ファイルが存在しなかった場合 JZONリテラル としてパースしてみる。
+                string jzon = File.Exists( text )
+                    ? File.ReadAllText( text ).fuzzy()
+                    : text.fuzzy();
+                try
+                {
+                    var parameter = TrimParameterJSON.Parse( jzon );
                     this.Add( name, parameter );
+                }
+                catch ( Exception )
+                {
+                    // ignore
                 }
             }
 
