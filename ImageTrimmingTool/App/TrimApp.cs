@@ -24,6 +24,7 @@ namespace ImageTrimmingTool.App
 
         private readonly TrimConfig _config;
 
+        private readonly TabCompletion _tab;
 
         #region ctor
         public TrimApp(string[] args) : base( args )
@@ -34,14 +35,34 @@ namespace ImageTrimmingTool.App
             this._strategy = new TrimSubDirectory();
 
 
-            // 定義済みパラメータファイルの事前読み込み
-            System.Diagnostics.Debug.WriteLine( Trimming.Default.TrimConfigPath );
-            this._config = new TrimConfig();
-            int n = this._config.Load( Trimming.Default.TrimConfigPath );
-            // 定義済みパラメータファイルの事前読み込み結果
-            System.Diagnostics.Debug.WriteLine( $"defined config parmeters ({n})." );
-            Console.WriteLine( $"defined config parmeters ({n})." );
-            this._config.Names.ForEach( name => Console.WriteLine( $"  - {name}" ) );
+            #region 定義済 ParameterJSON の読み込み
+            {
+                // 定義済みパラメータの事前読み込み
+                System.Diagnostics.Debug.WriteLine( Trimming.Default.TrimConfigPath );
+                this._config = new TrimConfig();
+                int n = this._config.Load( Trimming.Default.TrimConfigPath );
+            
+                // 定義済みパラメータの事前読み込み結果表示
+                System.Diagnostics.Debug.WriteLine( $"defined config parmeters ({n})." );
+                Console.WriteLine( $"defined config parmeters ({n})." );
+                this._config.Names.ForEach( name => Console.WriteLine( $"  - {name}" ) );
+            }
+            #endregion
+
+            #region TabCompletion の初期化
+            {
+                // Tab 補完入力するデータソースを構築。
+                var datasource = this._config.Names
+                        // 定義済み TrimParameterJSON の入力補完指定。
+                        .Select( x => "config:" + x )
+                        // オプション機能も入力補完候補に追加。
+                        .Concat( new[] { "--jpg" } );
+
+                // Tab 補完入力機能の初期化。
+                this._tab = new TabCompletion( datasource );
+                this._tab.Indent = false;
+            }
+            #endregion
         }
         #endregion
 
@@ -191,12 +212,7 @@ namespace ImageTrimmingTool.App
                     // パス入力
                     , ( path ) => { this.ExecutePathCallback( files, path ); }
                     // [TAB] 入力補完
-                    , new TabCompletion( _config.Names
-                            // 定義済みTrimParameterJSON の入力補完指定
-                            .Select( x => "config:" + x )
-                            // オプション
-                            .Concat( new[] { "--jpg" } )
-                    )
+                    , this._tab
                 ) )
             {
                 // 後処理は特になし。
