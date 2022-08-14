@@ -44,8 +44,6 @@ namespace ImageTrimmingTool.App
             
                 // 定義済みパラメータの事前読み込み結果表示
                 System.Diagnostics.Debug.WriteLine( $"defined config parmeters ({n})." );
-                Console.WriteLine( $"defined config parmeters ({n})." );
-                this._config.Names.ForEach( name => Console.WriteLine( $"  - {name}" ) );
             }
             #endregion
 
@@ -154,23 +152,22 @@ namespace ImageTrimmingTool.App
             // ■パラメータで入力ファイルが渡されなかった場合、ウィザードでフォルダ指定する。
             Option option = null;
             if ( _wizzard.TryInputOrPath(
-                    new[] {
-                            "ファイルが渡されなかったのでフォルダを指定スルノダ。",
-                            @"( input ""exit"" to exit )",
-                    },
-                    ( input ) =>
+                    (input) =>
                     {
                         option = new Option( input.ToLower() );
                     },
                     (_) => { },
-                    ( folder ) =>
+                    (folder) =>
                     {
                         // ウィザードでフォルダが指定された場合、JPEG/PNGファイルのリストを取得。
                         files = folder.GetFiles()
                             .AsEnumerable()
                             .Where( x => x.isSupportedImageFile() )
                             .ToList();
-                    } ) )
+                    },
+                    // messages.
+                    "ファイルが渡されなかったのでフォルダを指定スルノダ。",
+                    @"( input ""exit"" to exit )" ) )
             {
                 // フォルダを指定されて JPEG/PNG ファイルが有ればそれを返す。
                 if ( 0 < files.Count ) return files;
@@ -197,22 +194,21 @@ namespace ImageTrimmingTool.App
         private void Execute(List<FileInfo> files)
         {
             if ( _wizzard.TryInputOrPath(
-                    new[] {
-                            $"■変換ファイル - {files.Count}■",
-                            "【基本機能】",
-                            "    1. TrimParameterJSON を定義した .json ファイルパスを入力。",
-                            "    2. `config:{name}` で 定義済みTrimParameterJSON名 を入力。",
-                            "    3. 若しくは TrimParameterJSON文字列 をそのまま入力。",
-                            "【その他のオプション機能】",
-                            "    - `--jpeg(--<quality:int>)` to convert JPEG format." ,
-                            "    - `exit` to exit.",
-                    }
                     // テキスト入力
-                    , ( input ) => { this.ExecuteInputCallback( files, input ); }
+                    (input) => { this.ExecuteInputCallback( files, input ); },
                     // パス入力
-                    , ( path ) => { this.ExecutePathCallback( files, path ); }
+                    (path) => { this.ExecutePathCallback( files, path ); },
                     // [TAB] 入力補完
-                    , this._tab
+                    this._tab
+                    // messages.
+                    , $"■変換ファイル - {files.Count}■"
+                    , "【基本機能】"
+                    , "    1. TrimParameterJSON を定義した .json ファイルパスを入力。"
+                    , "    2. `config:{name}` で 定義済みTrimParameterJSON名 を入力。"
+                    , "    3. 若しくは TrimParameterJSON文字列 をそのまま入力。"
+                    , "【その他のオプション機能】"
+                    , "    - `--jpeg(--<quality:int>)` to convert JPEG format."
+                    , "    - `exit` to exit."
                 ) )
             {
                 // 後処理は特になし。
