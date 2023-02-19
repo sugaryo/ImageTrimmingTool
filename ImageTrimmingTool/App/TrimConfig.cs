@@ -30,6 +30,16 @@ namespace ImageTrimmingTool.App
                 string name = itor.Key;    // パラメータの識別名
                 string text = itor.Value;  // パラメータの定義ファイルパス、若しくは JZON直値
 
+                #region 読み飛ばし対象ノードのスキップ
+                // map[key] のコメントアウトノードをスキップ。
+                if ( name.StartsWith( "//" ) ) continue;
+                if ( name.StartsWith( "--" ) ) continue;
+                if ( name.StartsWith( "!" ) ) continue;
+                if ( name.StartsWith( "#" ) ) continue;
+                // map[value] の空ノードをスキップ。
+                if ( string.IsNullOrWhiteSpace( text ) ) continue;
+                #endregion
+
                 // 指定されたパラメータファイルがあれば JSON定義 を読み込む。
                 // ファイルが存在しなかった場合 JZONリテラル としてパースしてみる。
                 string jzon = File.Exists( text )
@@ -42,6 +52,7 @@ namespace ImageTrimmingTool.App
                 }
                 catch ( Exception )
                 {
+#warning TODO : パース失敗要素に関しては単純握り潰しにしているが、ワーニングログくらい出したいよね。
                     // ignore
                 }
             }
