@@ -30,6 +30,8 @@ namespace ImageTrimmingTool.App
                 string name = itor.Key;    // パラメータの識別名
                 string text = itor.Value;  // パラメータの定義ファイルパス、若しくは JZON直値
 
+#warning TODO : Map形式のKeyValueそれぞれに読み飛ばしノードの仕様を追加。
+
                 // 指定されたパラメータファイルがあれば JSON定義 を読み込む。
                 // ファイルが存在しなかった場合 JZONリテラル としてパースしてみる。
                 string jzon = File.Exists( text )
