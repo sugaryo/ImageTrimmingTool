@@ -44,6 +44,7 @@ namespace ImageTrimmingTool.App
                 }
                 catch ( Exception )
                 {
+#warning TODO : パース失敗要素に関しては単純握り潰しにしているが、ワーニングログくらい出したいよね。
                     // ignore
                 }
             }
