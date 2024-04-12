@@ -17,30 +17,30 @@ namespace ImageTrimmingTool.App
     {
         private const long DEFAULT_JPG_QUALITY = 100;
 
-        private readonly InputWizzard _wizzard;
+        private readonly InputWizzard wizzard;
 
 #warning ストラテジの必要性がなくなったのでアルゴリズム実装を見直し。
-        private readonly BaseTrimFileStrategy _strategy;
+        private readonly BaseTrimFileStrategy strategy;
 
-        private readonly TrimConfig _config;
+        private readonly TrimConfig config;
 
-        private readonly TabCompletion _tab;
+        private readonly TabCompletion tab;
 
         #region ctor
         public TrimApp(string[] args) : base( args )
         {
-            this._wizzard = new InputWizzard( new[] { "exit" } );
+            this.wizzard = new InputWizzard( new[] { "exit" } );
 
 
-            this._strategy = new TrimSubDirectory();
+            this.strategy = new TrimSubDirectory();
 
 
             #region 定義済 ParameterJSON の読み込み
             {
                 // 定義済みパラメータの事前読み込み
                 System.Diagnostics.Debug.WriteLine( Trimming.Default.TrimConfigPath );
-                this._config = new TrimConfig();
-                int n = this._config.Load( Trimming.Default.TrimConfigPath );
+                this.config = new TrimConfig();
+                int n = this.config.Load( Trimming.Default.TrimConfigPath );
             
                 // 定義済みパラメータの事前読み込み結果表示
                 System.Diagnostics.Debug.WriteLine( $"defined config parmeters ({n})." );
@@ -50,15 +50,15 @@ namespace ImageTrimmingTool.App
             #region TabCompletion の初期化
             {
                 // Tab 補完入力するデータソースを構築。
-                var datasource = this._config.Names
+                var datasource = this.config.Names
                         // 定義済み TrimParameterJSON の入力補完指定。
                         .Select( x => "config:" + x )
                         // オプション機能も入力補完候補に追加。
                         .Concat( new[] { "--jpg" } );
 
                 // Tab 補完入力機能の初期化。
-                this._tab = new TabCompletion( datasource );
-                this._tab.Indent = false;
+                this.tab = new TabCompletion( datasource );
+                this.tab.Indent = false;
             }
             #endregion
         }
@@ -151,7 +151,7 @@ namespace ImageTrimmingTool.App
 
             // ■パラメータで入力ファイルが渡されなかった場合、ウィザードでフォルダ指定する。
             Option option = null;
-            if ( _wizzard.TryInputOrPath(
+            if ( wizzard.TryInputOrPath(
                     (input) =>
                     {
                         option = new Option( input.ToLower() );
@@ -193,13 +193,13 @@ namespace ImageTrimmingTool.App
 
         private void Execute(List<FileInfo> files)
         {
-            if ( _wizzard.TryInputOrPath(
+            if ( wizzard.TryInputOrPath(
                     // テキスト入力
                     (input) => { this.ExecuteInputCallback( files, input ); },
                     // パス入力
                     (path) => { this.ExecutePathCallback( files, path ); },
                     // [TAB] 入力補完
-                    this._tab
+                    this.tab
                     // messages.
                     , $"■変換ファイル - {files.Count}■"
                     , "【基本機能】"
@@ -257,7 +257,7 @@ namespace ImageTrimmingTool.App
             #region InputConfig
             void InputConfig(string name)
             {
-                var parameter = this._config[name];
+                var parameter = this.config[name];
                 if ( null != parameter )
                 {
                     System.Diagnostics.Debug.WriteLine( $"[debug] ★ Config入力 : {name}" );
@@ -325,7 +325,7 @@ namespace ImageTrimmingTool.App
         {
             foreach ( var file in files )
             {
-                var trimed = _strategy.Trim( file, parameter );
+                var trimed = strategy.Trim( file, parameter );
 
 
                 Console.WriteLine( "trim." );
