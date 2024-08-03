@@ -40,20 +40,23 @@ namespace ImageTrimmingTool.App
                 if ( string.IsNullOrWhiteSpace( text ) ) continue;
                 #endregion
 
-                // 指定されたパラメータファイルがあれば JSON定義 を読み込む。
-                // ファイルが存在しなかった場合 JZONリテラル としてパースしてみる。
-                string jzon = File.Exists( text )
-                    ? File.ReadAllText( text ).fuzzy()
-                    : text.fuzzy();
                 try
                 {
+                    // 指定されたパラメータファイルがあれば JSON定義 を読み込む。
+                    // ファイルが存在しなかった場合 JZONリテラル としてパースしてみる。
+                    string jzon = File.Exists( text )
+                        ? File.ReadAllText( text ).fuzzy()
+                        : text.fuzzy();
+
+                    // JZON 補正した文字列を使って fuzzy にパースする。
                     var parameter = TrimParameterJSON.Parse( jzon );
                     this.Add( name, parameter );
                 }
                 catch ( Exception )
                 {
-#warning TODO : パース失敗要素に関しては単純握り潰しにしているが、ワーニングログくらい出したいよね。
-                    // ignore
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine( $"[!] JSON parse error [{name}], skip this setting node." );
+                    Console.ResetColor();
                 }
             }
 
