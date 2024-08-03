@@ -73,11 +73,11 @@ namespace ImageTrimmingTool.App
             // Java の Map ふうに追加。
             if ( this._config.ContainsKey( name ) )
             {
-                this._config.Add( name, parameter );
+                this._config[name] = parameter;
             }
             else
             {
-                this._config[name] = parameter;
+                this._config.Add( name, parameter );
             }
         }
         #endregion
