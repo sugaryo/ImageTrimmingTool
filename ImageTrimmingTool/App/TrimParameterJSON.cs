@@ -18,7 +18,6 @@ namespace ImageTrimmingTool.App
         }
         public struct DrawSetting
         {
-            public Size size;
             public int x;
             public int y;
             public int w;
@@ -77,7 +76,6 @@ namespace ImageTrimmingTool.App
 
         public DrawSetting Compile( Size origin )
         {
-            DrawSetting draw = new DrawSetting();
 
             #region 矩形トリミング用の領域設定
             // padding の設定を解析して int[] に変換する。
@@ -89,17 +87,11 @@ namespace ImageTrimmingTool.App
             int bottom = this.Bottom ?? this.B ?? this.PaddingBottom ?? padding[2];
             int left   = this.Left   ?? this.L ?? this.PaddingLeft   ?? padding[3];
 
+            DrawSetting draw = new DrawSetting();
             draw.x = left;
             draw.y = top;
-            draw.w = origin.Width - ( right + left );
-            draw.h = origin.Height - ( top + bottom );
-
-            // WidthHeight が指定されていない場合は自動計算。
-            int width  = this.Width  ?? this.W ?? draw.w;
-            int height = this.Height ?? this.H ?? draw.h;
-
-#warning draw.size と draw.w/h が同じ値になってないが大丈夫か確認。
-            draw.size = new Size( width, height );
+            draw.w = this.Width  ?? this.W ?? ( origin.Width - right - left );
+            draw.h = this.Height ?? this.H ?? ( origin.Height - top - bottom );
             #endregion
 
 
