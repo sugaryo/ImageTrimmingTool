@@ -50,7 +50,7 @@ namespace ImageTrimmingTool.App
 
                     // JZON 補正した文字列を使って fuzzy にパースする。
                     var parameter = TrimParameterJSON.Parse( jzon );
-                    this.Add( name, parameter );
+                    this.Put( name, parameter );
                 }
                 catch ( Exception )
                 {
@@ -70,18 +70,11 @@ namespace ImageTrimmingTool.App
         #endregion
 
 
-        #region Add
-        public void Add(string name, TrimParameterJSON parameter)
+        #region Put
+        public void Put(string name, TrimParameterJSON parameter)
         {
-            // Java の Map ふうに追加。
-            if ( this._config.ContainsKey( name ) )
-            {
-                this._config[name] = parameter;
-            }
-            else
-            {
-                this._config.Add( name, parameter );
-            }
+            // Java の Map ふうに追加。（あれば上書き、なければ追加）
+            this._config[name] = parameter;
         }
         #endregion
 
