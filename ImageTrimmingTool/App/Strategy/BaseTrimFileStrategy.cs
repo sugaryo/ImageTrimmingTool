@@ -21,7 +21,7 @@ namespace ImageTrimmingTool.App.Strategy
             {
                 TrimParameterJSON.DrawSetting draw = setting.Compile( src.Size );
 
-                using ( Bitmap dst = new Bitmap( draw.size.Width, draw.size.Height ) )
+                using ( Bitmap dst = new Bitmap( draw.w, draw.h ) )
                 {
                     using ( Graphics g = Graphics.FromImage( dst ) )
                     {

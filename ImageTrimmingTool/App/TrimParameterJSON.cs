@@ -18,7 +18,6 @@ namespace ImageTrimmingTool.App
         }
         public struct DrawSetting
         {
-            public Size size;
             public int x;
             public int y;
             public int w;
@@ -27,6 +26,9 @@ namespace ImageTrimmingTool.App
             public BorderSetting border;
         }
 
+
+        #region Trimming設定のプロパティ群
+        // 個別プロパティ：
         public int? Width { get; set; }
         public int? Height { get; set; }
 
@@ -35,8 +37,26 @@ namespace ImageTrimmingTool.App
         public int? Top { get; set; }
         public int? Bottom { get; set; }
 
+        // 個別プロパティのショートカット指定：
+        public int? W { get; set; }
+        public int? H { get; set; }
+
+        public int? L { get; set; }
+        public int? R { get; set; }
+        public int? T { get; set; }
+        public int? B { get; set; }
+
+
+        /// <summary>
+        /// css padding 風の指定。
+        /// </summary>
+        /// <remarks>
+        /// padding の指定が一番弱く、次に padding-xxx が強い。
+        /// 更に個別プロパティでの指定が最優先される。
+        /// </remarks>
         public string Padding { get; set; }
 
+        // padding 風の個別プロパティ：
         [JsonProperty( PropertyName = "padding-top" )]
         public int? PaddingTop { get; set; }
         [JsonProperty( PropertyName = "padding-right" )]
@@ -45,36 +65,33 @@ namespace ImageTrimmingTool.App
         public int? PaddingBottom { get; set; }
         [JsonProperty( PropertyName = "padding-left" )]
         public int? PaddingLeft { get; set; }
+        #endregion
 
-
+        #region ボーダーライン用のプロパティ群
         public int? Border { get; set; }
         [JsonProperty( PropertyName = "border-color" )]
         public string BorderColor { get; set; } = "Black";
+        #endregion
 
 
         public DrawSetting Compile( Size origin )
         {
-            DrawSetting draw = new DrawSetting();
 
             #region 矩形トリミング用の領域設定
-            // { top, right, bottom, left } を取得。
-            // 優先順位：無印.xxx > padding-xxx > padding[]
+            // padding の設定を解析して int[] に変換する。
             int[] padding = this.CompilePadding();
-            int top    = this.Top    ?? this.PaddingTop    ?? padding[0];
-            int right  = this.Right  ?? this.PaddingRight  ?? padding[1];
-            int bottom = this.Bottom ?? this.PaddingBottom ?? padding[2];
-            int left   = this.Left   ?? this.PaddingLeft   ?? padding[3];
+            // 以下の優先順位ルールに従って draw{x,y,w,h} を設定する。
+            // 優先順位：無印.xxx > ショートカット.xxx > padding-xxx > padding[]
+            int top    = this.Top    ?? this.T ?? this.PaddingTop    ?? padding[0];
+            int right  = this.Right  ?? this.R ?? this.PaddingRight  ?? padding[1];
+            int bottom = this.Bottom ?? this.B ?? this.PaddingBottom ?? padding[2];
+            int left   = this.Left   ?? this.L ?? this.PaddingLeft   ?? padding[3];
 
+            DrawSetting draw = new DrawSetting();
             draw.x = left;
             draw.y = top;
-            draw.w = origin.Width - ( right + left );
-            draw.h = origin.Height - ( top + bottom );
-
-            // WidthHeight が指定されていない場合は自動計算。
-            int width  = this.Width  ?? draw.w;
-            int height = this.Height ?? draw.h;
-
-            draw.size = new Size( width, height );
+            draw.w = this.Width  ?? this.W ?? ( origin.Width - right - left );
+            draw.h = this.Height ?? this.H ?? ( origin.Height - top - bottom );
             #endregion
 
 
